@@ -1,0 +1,80 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace WANI_Grid.Grid.Head
+{
+    public abstract class Header
+    {
+        #region 변수
+        private int index;  //Index
+        private string columnId;    //컬럼 ID
+        private string title;   //컬럼 타이틀
+        private int left;   //컬럼 시작위치
+        private int width;  //컬럼 폭
+        private HorizontalAlignment headAlign;  //컬럼 타이틀 정렬위치
+        private HorizontalAlignment textAlign;  //컬럼 내용 정렬위치
+        private bool visible = true;    //컬럼 Visible 여부
+        #endregion 변수
+
+        #region Property
+        public int Index
+        {
+            get { return index; }
+            set { index = value; }
+        }
+        public string ColumnId {
+            get { return columnId; }
+            set { columnId = value; }
+        }
+        public string Title
+        {
+            get { return title; }
+            set { title = value; }
+        }
+        public int Left
+        {
+            get { return left; }
+            set { left = value; }
+        }
+        public int Width
+        {
+            get { return width; }
+            set
+            {
+                if (value < 10)
+                    width = 10;
+                else
+                    width = value;
+                OnWidthResized();
+            }
+        }
+        public HorizontalAlignment HeadAlign
+        {
+            get { return headAlign; }
+            set { headAlign = value; }
+        }
+        public HorizontalAlignment TextAlign {
+            get { return textAlign; }
+            set { textAlign = value; }
+        }
+        public bool Visible
+        {
+            get { return visible; }
+            set { visible = value; }
+        }
+        #endregion Property
+
+        #region Event
+        public event EventHandler WidthResized;
+        private void OnWidthResized()
+        {
+            WidthResized?.Invoke(this, new EventArgs());
+        }
+        #endregion
+    }
+}
+
