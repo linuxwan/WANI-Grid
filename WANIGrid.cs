@@ -763,7 +763,7 @@ namespace WANI_Grid
                 if (col < 0) return; //col값이 -1이면 처리하지 않음
 
                 //Control Key를 누르지 않은 상태에서 컬럼을 선택했을 경우
-                if (ModifierKeys != Keys.Control)
+                if (Control.ModifierKeys != Keys.Control && Control.ModifierKeys != Keys.Shift)
                 {
                     //선택된 컬럼일 경우
                     if (selectedCols.Contains(col))
@@ -783,8 +783,22 @@ namespace WANI_Grid
                 }
                 else
                 {
-                    if (selectedCols.Contains(col)) selectedCols.Remove(col);   //선택된 컬럼을 다시 선택할 경우 제거해서 컬럼 선택 무효화
-                    else selectedCols.Add(col); //선택된 컬럼을 추가
+                    if (Control.ModifierKeys == Keys.Shift && selectedCols.Count > 0)
+                    {
+                        int index = selectedCols[0];
+                        int begin = Math.Min(col, index);
+                        int end = Math.Max(col, index);
+                        selectedCols.Clear();
+                        for (int i = begin; i <= end; i++)
+                        {
+                            selectedCols.Add(i);
+                        }
+                    }
+                    else if (Control.ModifierKeys == Keys.Control)
+                    {
+                        if (selectedCols.Contains(col)) selectedCols.Remove(col);   //선택된 컬럼을 다시 선택할 경우 제거해서 컬럼 선택 무효화
+                        else selectedCols.Add(col); //선택된 컬럼을 추가
+                    }
                 }
                 Invalidate();
             }
@@ -792,6 +806,11 @@ namespace WANI_Grid
             mousePoint.Y = e.Y;            
         }
 
+        /// <summary>
+        /// WANIGrid Control의 맨 왼쪽 컬럼에서 마우스 좌측 버튼을 눌렀을 경우
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void MouseLeftButtonClickInContents(object sender, MouseEventArgs e)
         {
             selectedCols.Clear();            
@@ -799,7 +818,7 @@ namespace WANI_Grid
             if (row < 0) return;    //row값이 -1이면 처리하지 않음
             if (e.X < leftHeaderWidth)  //맨 좌측의 첫 컬럼을 선택했을 시 Row를 선택하도록 처리
             {
-                if (ModifierKeys != Keys.Control && ModifierKeys != Keys.ShiftKey)
+                if (Control.ModifierKeys != Keys.Control && Control.ModifierKeys != Keys.Shift)
                 {
                     if (selectedRows.Contains(row))
                     {
@@ -815,10 +834,25 @@ namespace WANI_Grid
                         selectedRows.Clear();
                         selectedRows.Add(row);
                     }
-                } else
+                }
+                else
                 {
-                    if (selectedRows.Contains(row)) selectedRows.Remove(row);   //선택된 행(Row)을 다시 선택할 경우 제거해서 행(Row) 선택 무효화
-                    else selectedRows.Add(row); //선택된 행(Row)를 추가
+                    if (Control.ModifierKeys == Keys.Shift && selectedRows.Count > 0)
+                    {
+                        int index = selectedRows[0];
+                        int begin = Math.Min(row, index);
+                        int end = Math.Max(row, index);
+                        selectedRows.Clear();
+                        for (int i = begin; i <= end; i++)
+                        {
+                            selectedRows.Add(i);
+                        }
+                    }
+                    else if (Control.ModifierKeys == Keys.Control)
+                    {
+                        if (selectedRows.Contains(row)) selectedRows.Remove(row);   //선택된 행(Row)을 다시 선택할 경우 제거해서 행(Row) 선택 무효화
+                        else selectedRows.Add(row); //선택된 행(Row)를 추가
+                    }
                 }
             } else
             {

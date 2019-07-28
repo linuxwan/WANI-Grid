@@ -46,7 +46,7 @@
     <Reference Include="System.Xml" />
     <Reference Include="WANI Grid, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\WANI Grid\bin\Debug\WANI Grid.dll</HintPath>
+      <HintPath>..\bin\Debug\WANI Grid.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
