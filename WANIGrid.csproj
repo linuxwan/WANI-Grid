@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Grid\Element\Cell.cs" />
     <Compile Include="Grid\Element\Col.cs" />
     <Compile Include="Grid\Element\Row.cs" />
     <Compile Include="Grid\Element\RowCollection.cs" />

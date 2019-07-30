@@ -19,6 +19,13 @@ using System.Collections.Generic;
 /// </summary>
 namespace WANI_Grid
 {
+    public enum GridState
+    {
+        NONE,
+        ACTIVE,
+        EDIT
+    }
+
     public partial class WANIGrid : UserControl
     {
         #region 변수
@@ -48,6 +55,11 @@ namespace WANI_Grid
         private List<int> selectedRows = new List<int>();   //선택된 행(Rows)들을 관리하기 위한 변수
         private Point mousePoint = new Point(0, 0);
         private SolidBrush selectedColor = new SolidBrush(Color.LightCyan);
+        private Cell ActiveCell = new Cell(-1, -1);
+        private int ActiveCell_ActiveRow = 0;
+        private bool readOnly = false;
+        private TextBox editBox = null;
+        private GridState gridState = GridState.NONE;
         #endregion
 
         #region Property
@@ -135,6 +147,11 @@ namespace WANI_Grid
             hScrollBar.SmallChange = 1;
             rowHeight = Font.Height + 4;
             vScrollBar.SmallChange = rowHeight;
+            editBox = new TextBox();
+            editBox.BorderStyle = BorderStyle.None;
+            editBox.Font = Font;
+            editBox.Visible = false;
+            Controls.Add(editBox);
             //마우스 우측 버튼 클릭 시 제공되는 ContextMenu 초기화
             InitializeContextMenu();
         }
@@ -199,6 +216,7 @@ namespace WANI_Grid
         /// <param name="e"></param>
         public void HScrollBar_Scroll(object sender, ScrollEventArgs e)
         {
+            EndEdit();
             //가로 스크롤바를 움직여서 마지막 컬럼이 Client 영역에 나타났을 때
             if (e.NewValue >= (grid.GridHeaderList.Count - lastHScrollValue))
             {
@@ -258,6 +276,7 @@ namespace WANI_Grid
         /// <param name="e"></param>
         private void VScrollBar_Scroll(object sender, ScrollEventArgs e)
         {
+            EndEdit();
             firstVisibleRow = e.NewValue / rowHeight;
             if (firstVisibleRow > (allRowsHeight / rowHeight)) return;
 
@@ -285,6 +304,7 @@ namespace WANI_Grid
         /// <param name="e"></param>
         private void Mouse_Wheel(object sender, MouseEventArgs e)
         {
+            EndEdit();
             //Control Key를 누르고 Wheel을 돌렸을 경우는 HScrollBar와 동일
             if (ModifierKeys == Keys.Control)
             {
@@ -648,6 +668,110 @@ namespace WANI_Grid
         }
 
         /// <summary>
+        /// Active Cell을 표기한다.
+        /// </summary>
+        /// <param name="g"></param>
+        private void DrawActiveCell(Graphics g)
+        {
+            if (ActiveCell.Row != -1 && ActiveCell.Col != -1)
+            {
+                g.DrawRectangle(new Pen(Color.FromName("HotTrack"), 1), GetSelectedCellRect(ActiveCell.Row, ActiveCell.Col));
+            }
+        }
+
+        /// <summary>
+        /// 선택한 Cell의 영역을 반환
+        /// </summary>
+        /// <param name="row"></param>
+        /// <param name="col"></param>
+        /// <returns></returns>
+        protected Rectangle GetSelectedCellRect(int row, int col)
+        {
+            if (row < firstVisibleRow || row > lastVisibleRow) return new Rectangle(0, 0, 0, 0);
+            if (col < firstVisibleCol || col > lastVisibleCol) return new Rectangle(0, 0, 0, 0);
+
+            //선택된 Cell의 높이를 구한다.
+            int top = topHeaderHeight;
+            int height = 0;
+            for (int i = firstVisibleRow; i <= lastVisibleRow; i++)
+            {
+                height = rows[i].MaxLines * rowHeight;
+                if (row == i) break;
+                top += height;
+            }
+
+            int left = leftHeaderWidth + 2;
+            int width = 0;
+            for (int i = firstVisibleCol; i <= lastVisibleCol; i++)
+            {
+                //보여지는 컬럼의 폭이 컨트롤의 폭 보다 클경우
+                if (left + grid.GridHeaderList[i].Width > this.Width)
+                {
+                    width = this.Width - left - 1;
+                }
+                else
+                {
+                    width = grid.GridHeaderList[i].Width;
+                }
+
+                if (col == i) break;
+                left += width;
+            }
+
+            return new Rectangle(left - 1, top + 1, width - 1, height - 1);
+        }
+
+        private void BeginEdit()
+        {
+            if (readOnly) return;
+
+            if (ActiveCell.Col != -1 && ActiveCell.Row != -1)
+            {
+                string tempStr = "";
+                if (rows[ActiveCell.Row].DataRow[grid.GridHeaderList[ActiveCell.Col].ColumnId] != null)
+                {
+                    tempStr = rows[ActiveCell.Row].DataRow[grid.GridHeaderList[ActiveCell.Col].ColumnId].ToString();
+                }
+
+                if (tempStr.Length > 0)
+                {
+                    Rectangle r = GetSelectedCellRect(ActiveCell.Row, ActiveCell.Col);
+                    editBox.Text = tempStr;
+                    editBox.Left = r.Left + 5;
+                    editBox.Top = r.Top + 3 + (ActiveCell_ActiveRow * rowHeight);
+                    editBox.Height = editBox.Top + rowHeight;
+                    editBox.Width = r.Width - 7;
+                    editBox.Visible = true;
+                    editBox.Focus();
+                }
+                else
+                {
+                    editBox.Text = tempStr;
+                    Rectangle r = GetSelectedCellRect(ActiveCell.Row, ActiveCell.Col);
+                    editBox.Left = r.Left + 5;
+                    editBox.Top = r.Top + 3;
+                    editBox.Height = r.Height;
+                    editBox.Width = r.Width - 7;
+                    editBox.Visible = true;
+                    editBox.Focus();
+                }
+            }
+        }
+
+        private void EndEdit()
+        {
+            if (readOnly) return;
+            if (ActiveCell.Col != -1 && ActiveCell.Row != -1 && editBox.Visible)
+            {                
+                rows[ActiveCell.Row].DataRow[grid.GridHeaderList[ActiveCell.Col].ColumnId] = editBox.Text;
+            }
+
+            editBox.Visible = false;
+            editBox.Text = "";
+            gridState = GridState.ACTIVE;
+        }
+
+        /// <summary>
         /// Row 추가
         /// </summary>
         public void AppendRow()
@@ -703,6 +827,7 @@ namespace WANI_Grid
             DrawBackground(e.Graphics, rc);
             DrawHeaders(e.Graphics, rc);
             DrawContent(e.Graphics, rc, this.ClientRectangle.Width);
+            DrawActiveCell(e.Graphics);
         }
 
         private void WANIGrid_SizeChanged(object sender, EventArgs e)
@@ -815,6 +940,7 @@ namespace WANI_Grid
         {
             selectedCols.Clear();            
             int row = GetRowFromY(e.Y);
+            int col = GetColFromX(e.X);
             if (row < 0) return;    //row값이 -1이면 처리하지 않음
             if (e.X < leftHeaderWidth)  //맨 좌측의 첫 컬럼을 선택했을 시 Row를 선택하도록 처리
             {
@@ -853,12 +979,32 @@ namespace WANI_Grid
                         if (selectedRows.Contains(row)) selectedRows.Remove(row);   //선택된 행(Row)을 다시 선택할 경우 제거해서 행(Row) 선택 무효화
                         else selectedRows.Add(row); //선택된 행(Row)를 추가
                     }
-                }
-            } else
+                }                
+            }
+            else //WANIGrid Control 내부의 Content 영역을 마우스 좌측 버튼으로 클릭했을 때
             {
                 selectedRows.Clear();
-            }
+                selectedCols.Clear();
 
+                if (row == ActiveCell.Row && col == ActiveCell.Col)
+                {
+                    Rectangle r = GetSelectedCellRect(ActiveCell.Row, ActiveCell.Col);
+                    int k = 0;                    
+                    for (int i = r.Top; i < r.Bottom && k < rows[row].MaxLines - 1; i *= rowHeight, k++)
+                    {
+                        if (e.Y >= i && e.Y <= i + rowHeight) break;
+                    }
+                    if (ActiveCell_ActiveRow != k) EndEdit();
+                    ActiveCell_ActiveRow = k;
+                    BeginEdit();
+                }
+                else
+                {
+                    ActiveCell.Row = row;
+                    ActiveCell.Col = col;
+                    EndEdit();
+                }
+            }
             Invalidate();
         }
         #endregion Event                        
