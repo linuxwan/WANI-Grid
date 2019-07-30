@@ -732,29 +732,15 @@ namespace WANI_Grid
                 {
                     tempStr = rows[ActiveCell.Row].DataRow[grid.GridHeaderList[ActiveCell.Col].ColumnId].ToString();
                 }
-
-                if (tempStr.Length > 0)
-                {
-                    Rectangle r = GetSelectedCellRect(ActiveCell.Row, ActiveCell.Col);
-                    editBox.Text = tempStr;
-                    editBox.Left = r.Left + 5;
-                    editBox.Top = r.Top + 3 + (ActiveCell_ActiveRow * rowHeight);
-                    editBox.Height = editBox.Top + rowHeight;
-                    editBox.Width = r.Width - 7;
-                    editBox.Visible = true;
-                    editBox.Focus();
-                }
-                else
-                {
-                    editBox.Text = tempStr;
-                    Rectangle r = GetSelectedCellRect(ActiveCell.Row, ActiveCell.Col);
-                    editBox.Left = r.Left + 5;
-                    editBox.Top = r.Top + 3;
-                    editBox.Height = r.Height;
-                    editBox.Width = r.Width - 7;
-                    editBox.Visible = true;
-                    editBox.Focus();
-                }
+                //TextBox에 입력된 값을 설정하고 TextBox 속성의 값을 설정한다.
+                editBox.Text = tempStr;
+                Rectangle r = GetSelectedCellRect(ActiveCell.Row, ActiveCell.Col);
+                editBox.Left = r.Left + 5;
+                editBox.Top = r.Top + 3;
+                editBox.Height = r.Height;
+                editBox.Width = r.Width - 7;
+                editBox.Visible = true;
+                editBox.Focus();                
             }
         }
 
@@ -996,13 +982,13 @@ namespace WANI_Grid
                     }
                     if (ActiveCell_ActiveRow != k) EndEdit();
                     ActiveCell_ActiveRow = k;
-                    BeginEdit();
+                    BeginEdit();    
                 }
                 else
                 {
                     ActiveCell.Row = row;
                     ActiveCell.Col = col;
-                    EndEdit();
+                    EndEdit(); 
                 }
             }
             Invalidate();
