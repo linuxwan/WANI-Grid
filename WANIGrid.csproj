@@ -82,9 +82,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>LanguageResource.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Include="WANIGrid.en-US.resx">
-      <DependentUpon>WANIGrid.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="WANIGrid.resx">
       <DependentUpon>WANIGrid.cs</DependentUpon>
     </EmbeddedResource>

@@ -25,6 +25,7 @@ namespace WANI_Grid.Grid.Head
         private HorizontalAlignment headAlign;  //컬럼 타이틀 정렬위치
         private HorizontalAlignment textAlign;  //컬럼 내용 정렬위치
         private bool visible = true;    //컬럼 Visible 여부
+        private bool editable = true;   //컬럼 편집여부
         #endregion 변수
 
         #region Property
@@ -72,6 +73,12 @@ namespace WANI_Grid.Grid.Head
         {
             get { return visible; }
             set { visible = value; }
+        }
+
+        public bool Editable
+        {
+            get { return editable; }
+            set { editable = value; }
         }
         #endregion Property
 

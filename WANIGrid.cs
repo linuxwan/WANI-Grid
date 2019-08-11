@@ -9,6 +9,7 @@ using WANI_Grid.Resources;
 using System.ComponentModel;
 using WANI_Grid.Grid.Element;
 using System.Collections.Generic;
+using WANI_Grid.Util;
 /// <summary>
 /// 이 소스는 LGPL(GNU Lesser General Public Licence)를 따릅니다.
 /// 이 컨트롤을 사용하는 데에는 제한이 없으나, 해당 소스를 변경하거나 개선했을 경우에는 LGPL에 의해 소스를 제공해야 합니다.
@@ -57,9 +58,11 @@ namespace WANI_Grid
         private SolidBrush selectedColor = new SolidBrush(Color.LightCyan);
         private Cell ActiveCell = new Cell(-1, -1);
         private int ActiveCell_ActiveRow = 0;
+        private int ActiveCell_ActvieCol = -1;
         private bool readOnly = false;
         private TextBox editBox = null;
         private GridState gridState = GridState.NONE;
+        private SolidBrush blackBrush = new SolidBrush(Color.Black);
         #endregion
 
         #region Property
@@ -149,6 +152,7 @@ namespace WANI_Grid
             vScrollBar.SmallChange = rowHeight;
             editBox = new TextBox();
             editBox.BorderStyle = BorderStyle.None;
+            editBox.BackColor = Color.White;
             editBox.Font = Font;
             editBox.Visible = false;
             Controls.Add(editBox);
@@ -177,7 +181,7 @@ namespace WANI_Grid
             //세로 스크롤바 설정
             vScrollBar.Left = Width - vScrollBar.Width - 2;
             vScrollBar.Top = topHeaderHeight + 2;
-            vScrollBar.Height = Height - topHeaderHeight - hScrollBar.Height - 4;
+            vScrollBar.Height = Height - topHeaderHeight - hScrollBar.Height - 4;            
         }
 
         /// <summary>
@@ -207,6 +211,23 @@ namespace WANI_Grid
             vScrollBar.Scroll += new ScrollEventHandler(VScrollBar_Scroll);
             //마우스 휠
             this.MouseWheel += new MouseEventHandler(Mouse_Wheel);
+            //editBox TextChanged 이벤트
+            this.editBox.TextChanged += EditBox_TextChanged;
+        }
+
+        /// <summary>
+        /// TextBox인 editBox의 TextChanged Event
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void EditBox_TextChanged(object sender, EventArgs e)
+        {
+            DataRow row = rows[ActiveCell.Row].DataRow;
+            Header header = grid.GridHeaderList.Where(x => x.Index == ActiveCell.Col).FirstOrDefault();
+            if (header != null)
+            {
+                if (ActiveCell_ActvieCol > -1) row[header.ColumnId] = editBox.Text;
+            }
         }
 
         /// <summary>
@@ -384,6 +405,7 @@ namespace WANI_Grid
             {
                 for (col = firstVisibleCol; col < lastVisibleCol; col++)
                 {
+                    if (!grid.GridHeaderList[col].Visible) continue;
                     int width = grid.GridHeaderList[col].Width;
                     if (X < width + tempWidth) break;
                     tempWidth += width;
@@ -555,7 +577,6 @@ namespace WANI_Grid
         /// </summary>
         /// <param name="g"></param>
         /// <param name="rc"></param>
-
         private void DrawBackground(Graphics g, Rectangle rc)
         {
             g.DrawRectangle(new Pen(SystemColors.Control, 2), 0, 0, rc.Width, rc.Height);
@@ -570,6 +591,7 @@ namespace WANI_Grid
 
                 for (int j = firstVisibleCol; j < lastVisibleCol && j < index; j++)
                 {
+                    if (!grid.GridHeaderList[j].Visible) continue;
                     left += grid.GridHeaderList[j].Width;
                 }
 
@@ -582,10 +604,8 @@ namespace WANI_Grid
             //선택된 행(Row)의 Background를 그린다.
             for (int i = 0; i < selectedRows.Count; i++)
             {
-                int index = selectedRows[i];
-                //if (index < firstVisibleCol || index > lastVisibleRow) continue;
+                int index = selectedRows[i];                
                 int top = topHeaderHeight;
-
                 int width = 0;
 
                 for (int k = firstVisibleCol; k <= lastVisibleCol; k++)
@@ -599,7 +619,7 @@ namespace WANI_Grid
                 }
                 g.FillRectangle(selectedColor, leftHeaderWidth + 1, top + 1, width, rowHeight);
             }
-        }
+        }        
 
         /// <summary>
         /// Grid의 Header 그리기
@@ -636,24 +656,32 @@ namespace WANI_Grid
                     int columnWidth = 0;
 
                     for (int j = firstVisibleCol; j <= lastVisibleCol && j < grid.GridHeaderList.Count; j++)
-                    {
+                    {                        
+                        Col col = new Col(this.grid.HeaderGen.GetHeaders(), rows[i].DataRow);
+                        string content = col.GetColText(j);
                         if (j == firstVisibleCol)
                         {
                             g.FillRectangle(brush, 1, columnStartY + 1, leftHeaderWidth, rowHeight);
-                            g.DrawRectangle(pen, 1, columnStartY + 1, leftHeaderWidth, rowHeight);
+                            g.DrawRectangle(pen, 1, columnStartY + 1, leftHeaderWidth, rowHeight);                            
                             columnStartX += leftHeaderWidth;  //첫 시작컬럼의 폭을 leftHeaderWidth 만큼 설정                                            
                         }
+
+                        if (!grid.GridHeaderList[j].Visible) continue;
 
                         //보여지는 컬럼의 폭이 컨트롤의 폭 보다 클경우
                         if (columnStartX + grid.GridHeaderList[j].Width > controlWidth)
                         {
                             columnWidth = controlWidth - columnStartX - 3;
                             g.DrawRectangle(pen, columnStartX + 1, columnStartY + 1, columnWidth, rowHeight);
+                            Rectangle rec = new Rectangle(columnStartX + 2, columnStartY + 2, columnWidth - 2, rowHeight);
+                            DrawStringAlignment(content, rec, g, col.Alignment);                            
                         }
                         else
                         {
                             columnWidth = grid.GridHeaderList[j].Width;
-                            g.DrawRectangle(pen, columnStartX + 1, columnStartY + 1, columnWidth, rowHeight);
+                            g.DrawRectangle(pen, columnStartX + 1, columnStartY + 1, columnWidth, rowHeight);                            
+                            Rectangle rec = new Rectangle(columnStartX + 2, columnStartY + 2, columnWidth - 2, rowHeight);
+                            DrawStringAlignment(content, rec, g, col.Alignment);                            
                         }
                         columnStartX += columnWidth;
                     }
@@ -668,6 +696,21 @@ namespace WANI_Grid
         }
 
         /// <summary>
+        /// Content 정렬에 맞추어 텍스트를 보여준다.
+        /// </summary>
+        /// <param name="txt"></param>
+        /// <param name="rec"></param>
+        /// <param name="g"></param>
+        /// <param name="align"></param>
+        private void DrawStringAlignment(string txt, Rectangle rec, Graphics g, HorizontalAlignment align)
+        {
+            StringFormat sf = new StringFormat();
+            sf.Alignment = StringUtil.GetStringAlignment(sf, align); //Header에서 정렬방식을 체크해서 StringFormat의 Alignment 반환
+            sf.LineAlignment = StringAlignment.Center;
+            g.DrawString(txt, Font, blackBrush, rec, sf);
+        }
+
+        /// <summary>
         /// Active Cell을 표기한다.
         /// </summary>
         /// <param name="g"></param>
@@ -675,7 +718,7 @@ namespace WANI_Grid
         {
             if (ActiveCell.Row != -1 && ActiveCell.Col != -1)
             {
-                g.DrawRectangle(new Pen(Color.FromName("HotTrack"), 1), GetSelectedCellRect(ActiveCell.Row, ActiveCell.Col));
+                g.DrawRectangle(new Pen(Color.FromName("HotTrack"), 1), GetSelectedCellRect(ActiveCell.Row, ActiveCell.Col));                
             }
         }
 
@@ -704,6 +747,8 @@ namespace WANI_Grid
             int width = 0;
             for (int i = firstVisibleCol; i <= lastVisibleCol; i++)
             {
+                if (!grid.GridHeaderList[i].Visible) continue;
+                
                 //보여지는 컬럼의 폭이 컨트롤의 폭 보다 클경우
                 if (left + grid.GridHeaderList[i].Width > this.Width)
                 {
@@ -714,10 +759,10 @@ namespace WANI_Grid
                     width = grid.GridHeaderList[i].Width;
                 }
 
-                if (col == i) break;
+                if (col == i) break;                
                 left += width;
             }
-
+            
             return new Rectangle(left - 1, top + 1, width - 1, height - 1);
         }
 
@@ -735,12 +780,13 @@ namespace WANI_Grid
                 //TextBox에 입력된 값을 설정하고 TextBox 속성의 값을 설정한다.
                 editBox.Text = tempStr;
                 Rectangle r = GetSelectedCellRect(ActiveCell.Row, ActiveCell.Col);
-                editBox.Left = r.Left + 5;
+                editBox.Left = r.Left + 3;
                 editBox.Top = r.Top + 3;
                 editBox.Height = r.Height;
-                editBox.Width = r.Width - 7;
+                editBox.Width = r.Width - 3;
                 editBox.Visible = true;
-                editBox.Focus();                
+                editBox.Focus();
+                ActiveCell_ActvieCol = ActiveCell.Col; //ActivieCell_ActiveCol 값을 설정   
             }
         }
 
@@ -748,10 +794,9 @@ namespace WANI_Grid
         {
             if (readOnly) return;
             if (ActiveCell.Col != -1 && ActiveCell.Row != -1 && editBox.Visible)
-            {                
-                rows[ActiveCell.Row].DataRow[grid.GridHeaderList[ActiveCell.Col].ColumnId] = editBox.Text;
+            {
+                ActiveCell_ActvieCol = -1;
             }
-
             editBox.Visible = false;
             editBox.Text = "";
             gridState = GridState.ACTIVE;

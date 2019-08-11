@@ -62,10 +62,12 @@ namespace WANI_Grid.Grid.Head
             graphics.DrawRectangle(pen, columnStartX + 1, 1, leftHeaderWidth, topHeaderHeight);
             
             for (int i = firstVisibleCol; i <= lastVisibleCol; i++)
-            {
+            {                
                 if (i == firstVisibleCol) columnStartX += leftHeaderWidth;  //첫 시작컬럼의 폭을 leftHeaderWidth 만큼 설정
                 int headerWidth = this._headers[i].Width;   //i 번째 컬럼의 폭을 설정
-                
+
+                if (!this._headers[i].Visible) continue;
+
                 //보여지는 컬럼의 폭이 컨트롤의 폭 보다 클경우
                 if (columnStartX  + headerWidth > controlWidth)
                 {
