@@ -863,6 +863,7 @@ namespace WANI_Grid
         private void WANIGrid_Resize(object sender, EventArgs e)
         {
             rc = new Rectangle(0, 0, this.ClientRectangle.Width, this.ClientRectangle.Height);
+            ActiveCell.Clear();
             InitializeScollBar();
             ReCalcScrollBars();
             Invalidate();
@@ -881,6 +882,7 @@ namespace WANI_Grid
         private void WANIGrid_SizeChanged(object sender, EventArgs e)
         {
             rc = new Rectangle(0, 0, this.ClientRectangle.Width, this.ClientRectangle.Height);
+            ActiveCell.Clear();
             InitializeScollBar();
             ReCalcScrollBars();
             Invalidate();
@@ -889,6 +891,7 @@ namespace WANI_Grid
         private void WANIGrid_ClientSizeChanged(object sender, EventArgs e)
         {
             rc = new Rectangle(0, 0, this.ClientRectangle.Width, this.ClientRectangle.Height);
+            ActiveCell.Clear();
             InitializeScollBar();
             ReCalcScrollBars();
             Invalidate();
@@ -911,6 +914,7 @@ namespace WANI_Grid
                 //WANIGrid Top Header 영역을 마우스 좌측 버튼으로 클릭했을 때
                 if (e.Y < topHeaderHeight)
                 {
+                    //Cursor가 Cursors.VSplite로 변경되었을 경우 vSpliteLineMouseDown을 true로 변경
                     if (Cursor == Cursors.VSplit)
                     {
                         vSpliteLineMouseDown = true;
@@ -921,6 +925,7 @@ namespace WANI_Grid
                         MouseLeftButtonClickInTopHeadHeight(sender, e);
                         Invalidate();
                     }
+                    //Header 영역에서 왼쪽 마우스 버튼이 눌려졌을 때 마우스 포인트 저장.
                     mousePoint.X = e.X;
                     mousePoint.Y = e.Y;
                 }
@@ -1067,6 +1072,7 @@ namespace WANI_Grid
 
         private void WANIGrid_MouseUp(object sender, MouseEventArgs e)
         {
+            //컬럼 사이즈 변경이 완료 되었을 경우 현재 컬럼의 Width 값을 다시 계산해서 저장한다.
             if (vSpliteLineMouseDown)
             {
                 int width = e.X - mousePoint.X;
@@ -1076,12 +1082,14 @@ namespace WANI_Grid
                 mousePoint.X = 0;
                 mousePoint.Y = 0;
             }
+            //vSpliteLineMouseDown 값을 false, Cursor를 Cursors.Default로 설정
             vSpliteLineMouseDown = false;
             Cursor = Cursors.Default;
         }
 
         private void WANIGrid_MouseMove(object sender, MouseEventArgs e)
         {
+            //vSpliteLineMouseDown이 true 이면 마우스 버튼이 눌러진 상태에서 이동 중인 상태임.
             if (vSpliteLineMouseDown)
             {
                 if (Math.Abs(e.X - lastMousePoint.X) > 4) DrawVSpriteLine(new Point(e.X, e.Y));
@@ -1092,12 +1100,12 @@ namespace WANI_Grid
             Cursor = Cursors.Default;
             if (grid.GridHeaderList.Count > 0 && e.Y < topHeaderHeight)
             {
-                int colLine = leftHeaderWidth;
+                int colLine = leftHeaderWidth; //각 컬럼이 끝나는 지점의 X좌표를 저장하는 변수
                 for (int i = firstVisibleCol; i <= lastVisibleCol; i++)
                 {
                     if (!grid.GridHeaderList[i].Visible) continue;
                     colLine += grid.GridHeaderList[i].Width;
-                    
+                    //Header의 컬럼과 컬럼 간의 경계선 상에 마우스 포인트가 위치했을 경우
                     if (e.X > colLine - 2 && e.X < colLine + 2)
                     {
                         Cursor = Cursors.VSplit;
