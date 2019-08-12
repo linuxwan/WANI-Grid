@@ -63,6 +63,9 @@ namespace WANI_Grid
         private TextBox editBox = null;
         private GridState gridState = GridState.NONE;
         private SolidBrush blackBrush = new SolidBrush(Color.Black);
+        private bool vSpliteLineMouseDown = false;
+        private int resizeCol = 0;  //사이즈 변경이 발생한 컬럼을 저장하기 위한 변수
+        private Point lastMousePoint = new Point(0, 0);
         #endregion
 
         #region Property
@@ -723,6 +726,20 @@ namespace WANI_Grid
         }
 
         /// <summary>
+        /// 컬럼 사이즈 변경을 위해 Header영역의 컬럼과 컬럼 경계선을 선택하고 마우스 이동을 할때 표시되는 세로 선
+        /// </summary>
+        /// <param name="pos"></param>
+        private void DrawVSpriteLine(Point pos)
+        {
+            int allHeight = topHeaderHeight + allRowsHeight;
+            Graphics g = Graphics.FromHwnd(this.Handle);
+            Rectangle rc = new Rectangle(lastMousePoint.X - 1, 1, 2, allHeight);
+            Invalidate(rc);
+            g.DrawLine(new Pen(Color.Gray, 2), pos.X, 1, pos.X, allHeight);
+            lastMousePoint = pos;
+            g.Dispose();
+        }
+        /// <summary>
         /// 선택한 Cell의 영역을 반환
         /// </summary>
         /// <param name="row"></param>
@@ -894,12 +911,24 @@ namespace WANI_Grid
                 //WANIGrid Top Header 영역을 마우스 좌측 버튼으로 클릭했을 때
                 if (e.Y < topHeaderHeight)
                 {
-                    MouseLeftButtonClickInTopHeadHeight(sender, e);
+                    if (Cursor == Cursors.VSplit)
+                    {
+                        vSpliteLineMouseDown = true;
+                    }
+                    else
+                    {
+                        vSpliteLineMouseDown = false;
+                        MouseLeftButtonClickInTopHeadHeight(sender, e);
+                        Invalidate();
+                    }
+                    mousePoint.X = e.X;
+                    mousePoint.Y = e.Y;
                 }
                 else //WANIGrid의 Top Header 영역을 제외한 영역에서 마우스 좌측 버튼을 클릭했을 때
                 {
                     MouseLeftButtonClickInContents(sender, e);
-                }
+                    Invalidate();
+                }                
             }
         }
 
@@ -916,7 +945,7 @@ namespace WANI_Grid
             if (grid.GridHeaderList.Count > 0)
             {
                 int col = GetColFromX(e.X);
-                if (col < 0) return; //col값이 -1이면 처리하지 않음
+                if (col < 0) return; //col값이 -1이면 처리하지 않음                
 
                 //Control Key를 누르지 않은 상태에서 컬럼을 선택했을 경우
                 if (Control.ModifierKeys != Keys.Control && Control.ModifierKeys != Keys.Shift)
@@ -955,11 +984,8 @@ namespace WANI_Grid
                         if (selectedCols.Contains(col)) selectedCols.Remove(col);   //선택된 컬럼을 다시 선택할 경우 제거해서 컬럼 선택 무효화
                         else selectedCols.Add(col); //선택된 컬럼을 추가
                     }
-                }
-                Invalidate();
-            }
-            mousePoint.X = e.X;
-            mousePoint.Y = e.Y;            
+                }                
+            }                     
         }
 
         /// <summary>
@@ -1036,8 +1062,50 @@ namespace WANI_Grid
                     EndEdit(); 
                 }
             }
-            Invalidate();
         }
         #endregion Event                        
+
+        private void WANIGrid_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (vSpliteLineMouseDown)
+            {
+                int width = e.X - mousePoint.X;
+                grid.GridHeaderList[resizeCol].Width += width;
+                Invalidate();
+
+                mousePoint.X = 0;
+                mousePoint.Y = 0;
+            }
+            vSpliteLineMouseDown = false;
+            Cursor = Cursors.Default;
+        }
+
+        private void WANIGrid_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (vSpliteLineMouseDown)
+            {
+                if (Math.Abs(e.X - lastMousePoint.X) > 4) DrawVSpriteLine(new Point(e.X, e.Y));
+                return;
+            }
+
+            //WANIGrid Header영역의 마우스 위치를 체크 - 컬럼과 컬럼 사이의 경계선에 위치하면 Cursors.VSplit로 변경하고 resizeColumn을 확인한다.
+            Cursor = Cursors.Default;
+            if (grid.GridHeaderList.Count > 0 && e.Y < topHeaderHeight)
+            {
+                int colLine = leftHeaderWidth;
+                for (int i = firstVisibleCol; i <= lastVisibleCol; i++)
+                {
+                    if (!grid.GridHeaderList[i].Visible) continue;
+                    colLine += grid.GridHeaderList[i].Width;
+                    
+                    if (e.X > colLine - 2 && e.X < colLine + 2)
+                    {
+                        Cursor = Cursors.VSplit;
+                        resizeCol = i;
+                        break;
+                    }                    
+                }
+            }
+        }
     }
 }
