@@ -729,13 +729,13 @@ namespace WANI_Grid
         /// 컬럼 사이즈 변경을 위해 Header영역의 컬럼과 컬럼 경계선을 선택하고 마우스 이동을 할때 표시되는 세로 선
         /// </summary>
         /// <param name="pos"></param>
-        private void DrawVSpriteLine(Point pos)
+        private void DrawVSpliteLine(Point pos)
         {
             int allHeight = topHeaderHeight + allRowsHeight;
             Graphics g = Graphics.FromHwnd(this.Handle);
-            Rectangle rc = new Rectangle(lastMousePoint.X - 1, 1, 2, allHeight);
+            Rectangle rc = new Rectangle(lastMousePoint.X - 1, 1, 2, allHeight - (firstVisibleRow * rowHeight));
             Invalidate(rc);
-            g.DrawLine(new Pen(Color.Gray, 2), pos.X, 1, pos.X, allHeight);
+            g.DrawLine(new Pen(Color.Gray, 2), pos.X, 1, pos.X, allHeight - (firstVisibleRow * rowHeight));
             lastMousePoint = pos;
             g.Dispose();
         }
@@ -1093,7 +1093,7 @@ namespace WANI_Grid
             //vSpliteLineMouseDown이 true 이면 마우스 버튼이 눌러진 상태에서 이동 중인 상태임.
             if (vSpliteLineMouseDown)
             {
-                if (Math.Abs(e.X - lastMousePoint.X) > 4) DrawVSpriteLine(new Point(e.X, e.Y));
+                if (Math.Abs(e.X - lastMousePoint.X) > 4) DrawVSpliteLine(new Point(e.X, e.Y));
                 return;
             }
 
