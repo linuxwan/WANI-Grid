@@ -63,9 +63,9 @@ namespace WANI_Grid
         private TextBox editBox = null;
         private GridState gridState = GridState.NONE;
         private SolidBrush blackBrush = new SolidBrush(Color.Black);
-        private bool vSpliteLineMouseDown = false;
+        private bool vSpliteLineMouseDown = false;  //컬럼 경계선 상에서 마우스 좌측버튼이 눌러졌는지를 저장하기 위한 변수
         private int resizeCol = 0;  //사이즈 변경이 발생한 컬럼을 저장하기 위한 변수
-        private Point lastMousePoint = new Point(0, 0);
+        private Point lastMousePoint = new Point(0, 0); //마우스 좌측 버튼을 누른 상태에서 마지막 이동 Point를 저장하기 위한 변수
         #endregion
 
         #region Property
@@ -739,6 +739,7 @@ namespace WANI_Grid
             lastMousePoint = pos;
             g.Dispose();
         }
+
         /// <summary>
         /// 선택한 Cell의 영역을 반환
         /// </summary>
@@ -1096,7 +1097,7 @@ namespace WANI_Grid
                 return;
             }
 
-            //WANIGrid Header영역의 마우스 위치를 체크 - 컬럼과 컬럼 사이의 경계선에 위치하면 Cursors.VSplit로 변경하고 resizeColumn을 확인한다.
+            //WANIGrid Header영역의 마우스 위치를 체크 - 컬럼과 컬럼 사이의 경계선에 위치하면 Cursors.VSplit로 변경하고 resizeCol을 확인한다.
             Cursor = Cursors.Default;
             if (grid.GridHeaderList.Count > 0 && e.Y < topHeaderHeight)
             {
