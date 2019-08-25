@@ -33,7 +33,8 @@ namespace WANIGridTest
             builder.AddHeader(new DefaultHeader("Col10", "Column 10", 90, HorizontalAlignment.Center, HorizontalAlignment.Left, true));
             builder.InitializeHeader();
             this.waniGrid.SetHeader(builder);
-            //this.waniGrid.SelectedColor = Color.LightBlue;
+            //ContextMenu 숨기기 - 아래의 주석을 풀면 됨
+            //this.waniGrid.IsShowContextMenu = false;
         }
     }
 }

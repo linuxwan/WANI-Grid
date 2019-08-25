@@ -66,6 +66,7 @@ namespace WANI_Grid
         private bool vSpliteLineMouseDown = false;  //컬럼 경계선 상에서 마우스 좌측버튼이 눌러졌는지를 저장하기 위한 변수
         private int resizeCol = 0;  //사이즈 변경이 발생한 컬럼을 저장하기 위한 변수
         private Point lastMousePoint = new Point(0, 0); //마우스 좌측 버튼을 누른 상태에서 마지막 이동 Point를 저장하기 위한 변수
+        private bool isShowContextMenu = true;    //ContextMenu 제공 여부
         #endregion
 
         #region Property
@@ -142,6 +143,15 @@ namespace WANI_Grid
         {            
             set { selectedColor = new SolidBrush(value); }
         }
+
+        /// <summary>
+        /// 마우스 우측 버튼 클릭 시 ContextMenu 제공 여부
+        /// </summary>
+        public bool IsShowContextMenu
+        {
+            get { return isShowContextMenu; }
+            set { isShowContextMenu = value; }
+        }
         #endregion Property
 
         #region 생성자
@@ -200,7 +210,10 @@ namespace WANI_Grid
             rightClickMenu.MenuItems.Add(LanguageResource.Row_Append);
             rightClickMenu.MenuItems.Add(LanguageResource.Row_Delete);
 
+            rightClickMenu.MenuItems[0].Click += new EventHandler(OnMenu_BeforeInsertRow_Click);
+            rightClickMenu.MenuItems[1].Click += new EventHandler(OnMenu_AfterInsertRow_Click);
             rightClickMenu.MenuItems[2].Click += new EventHandler(OnMenu_AppenRow_Click);
+            rightClickMenu.MenuItems[3].Click += new EventHandler(OnMenu_DeleteRow_Click);
         }
 
         /// <summary>
@@ -225,6 +238,12 @@ namespace WANI_Grid
         /// <param name="e"></param>
         private void EditBox_TextChanged(object sender, EventArgs e)
         {
+            if (rows.Count < 1)
+            {
+                editBox.Visible = false;
+                return;
+            }
+
             DataRow row = rows[ActiveCell.Row].DataRow;
             Header header = grid.GridHeaderList.Where(x => x.Index == ActiveCell.Col).FirstOrDefault();
             if (header != null)
@@ -721,7 +740,11 @@ namespace WANI_Grid
         {
             if (ActiveCell.Row != -1 && ActiveCell.Col != -1)
             {
-                g.DrawRectangle(new Pen(Color.FromName("HotTrack"), 1), GetSelectedCellRect(ActiveCell.Row, ActiveCell.Col));                
+                //파선 패턴 설정
+                float[] dashValues = { 1, 1, 1, 1 };
+                Pen grayPen = new Pen(Color.Gray, 1);
+                grayPen.DashPattern = dashValues;                
+                g.DrawRectangle(grayPen, GetSelectedCellRect(ActiveCell.Row, ActiveCell.Col));                                
             }
         }
 
@@ -756,6 +779,11 @@ namespace WANI_Grid
             int height = 0;
             for (int i = firstVisibleRow; i <= lastVisibleRow; i++)
             {
+                if (rows.Count == 0)
+                {
+                    EndEdit();
+                    continue;
+                }
                 height = rows[i].MaxLines * rowHeight;
                 if (row == i) break;
                 top += height;
@@ -828,24 +856,219 @@ namespace WANI_Grid
             DataRow row = dataSource.NewRow();
             Row r = new Row(row);
             rows.Add(r);
-            dataSource.Rows.Add(row);
-            allRowsHeight += Font.Height + 4;
+            dataSource.Rows.Add(row);            
             rowHeight = Font.Height + 4;
+            allRowsHeight += rowHeight;            
             OnRowsChanged();
         }
 
+        /// <summary>
+        /// Row 삭제
+        /// </summary>
+        /// <param name="delRow"></param>
+        public void DeleteRow(int delRow)
+        {
+            if (delRow < rows.Count && delRow >= 0)
+            {
+                DataRow row = rows[delRow].DataRow; //전체 Row중에 선택 Row를 가져온다.
+                row.Delete();   //해당 Row 정보를 delete한다. 
+                rows.RemoveAt(delRow);  //전체 Row중에 선택된 Row를 제거한다.      
+                allRowsHeight -= rowHeight; //전제 Row의 높이에서 선택된 Row의 높이를 뺀다
+                OnRowsChanged();
+            }
+        }
+
+        /// <summary>
+        /// 1개의 Row 삭제 후 선택한 행들의 Index 정보를 갱신한다.
+        /// </summary>
+        /// <param name="index"></param>
+        private void RebuildSelectedRowsIndex(int index)
+        {
+            for (int i = index; i < selectedRows.Count; i++)
+            {
+                int reIndex = selectedRows[i] - 1;
+                selectedRows[i] = reIndex;
+            }
+        }
+
+        /// <summary>
+        /// 이전 행에 Row 추가
+        /// </summary>
+        /// <param name="crntRow"></param>
+        public void BeforeInsert(int crntRow)
+        {
+            DataRow row = dataSource.NewRow();  //DataTable인 dataSource에 새로운 행의 DataRow 생성
+            Row r = new Row(row);   //새로운 Row를 생성
+
+            if (crntRow < 0) crntRow = 0;   //crntRow의 값이 0보다 작으면 0으로 설정
+            rows.Insert(crntRow, r);    //전제 Row를 관리하는 List인 rows에 생성된 Row를 추가 
+            dataSource.Rows.InsertAt(row, crntRow); //생성된 DataRow를 DataTable에 원하는 위치에 Insert
+            allRowsHeight += Font.Height + 4;   //전체 Row의 높이 값을 저장하는 allRowsHeight에 추가되는 Row의 높이 값을 더한다.
+            rowHeight = Font.Height + 4;    //1개 Row의 높이 값을 rowHeight 변수에 저장
+            OnRowsChanged();
+        }
+
+        /// <summary>
+        /// 다음 행에 Row 추가
+        /// </summary>
+        /// <param name="crntRow"></param>
+        public void AfterInsert(int crntRow)
+        {            
+            if (crntRow + 1 == rows.Count) //현재 행(Row)가 마지막 행(Row)일 경우
+            {
+                AppendRow();
+            }
+            else
+            {
+                DataRow row = dataSource.NewRow();  //DataTable인 dataSource에 새로운 행의 DataRow 생성
+                Row r = new Row(row);    //새로운 Row를 생성
+                rows.Insert(crntRow + 1, r);    //핸재 행의 다음행에 추가
+                dataSource.Rows.InsertAt(row, crntRow + 1);     //생성된 DataRow를 DataTable의 현재행 다음에 Insert
+                allRowsHeight += Font.Height + 4;   //전체 Row의 높이 값을 저장하는 allRowsHeight에 추가되는 Row의 높이 값을 더한다.
+                rowHeight = Font.Height + 4;    //1개 Row의 높이 값을 rowHeight 변수에 저장
+                OnRowsChanged();
+            }
+        }
+
+        /// <summary>
+        /// 행(Row)이 추가 또는 삭제 되었을 때 호출. 행(Row) 변화에 맞춰 화면을 새로 그리도록 한다.
+        /// </summary>
         public void OnRowsChanged()
         {
             ReCalcScrollBars();
             CalcVisibleRange();
             Invalidate(true);
         }
+
+        /// <summary>
+        /// Context Menu를 보여준다.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ShowContextMenu(object sender, MouseEventArgs e)
+        {
+            if (!isShowContextMenu) return;
+            //마우스 우측 버튼이 클릭된 좌표 값을 얻어온다.
+            Point p = new Point(e.X, e.Y);
+            
+            if (selectedRows.Count <= 0)
+            {
+                rightClickMenu.MenuItems[0].Enabled = false;
+                rightClickMenu.MenuItems[1].Enabled = false;
+                rightClickMenu.MenuItems[2].Enabled = true;
+                rightClickMenu.MenuItems[3].Enabled = false;
+            }
+            else if (selectedRows.Count == 1)
+            {
+                rightClickMenu.MenuItems[0].Enabled = true;
+                rightClickMenu.MenuItems[1].Enabled = true;
+                rightClickMenu.MenuItems[2].Enabled = true;
+                rightClickMenu.MenuItems[3].Enabled = true;
+            }
+            else if (selectedRows.Count > 1)
+            {
+                rightClickMenu.MenuItems[0].Enabled = false;
+                rightClickMenu.MenuItems[1].Enabled = false;
+                rightClickMenu.MenuItems[2].Enabled = true;
+                rightClickMenu.MenuItems[3].Enabled = true;
+            }
+
+            rightClickMenu.Show(this, p);
+        }
+
+        private void SelectedRowsChangeColor(int row)
+        {
+            if (Control.ModifierKeys != Keys.Control && Control.ModifierKeys != Keys.Shift)
+            {
+                if (selectedRows.Contains(row))
+                {
+                    if (selectedRows.Count > 1) //선택된 행(Row)이 2개 이상일 경우
+                    {
+                        selectedRows.Clear();   //여러 행(Row)가 선택된 경우 기존의 선택된 행(Row) 무효화
+                        selectedRows.Add(row);  //선택 행(Row) 추가
+                    }
+                    else selectedRows.Remove(row);  //동일한 행(Row)를 2번 선택하면 선택 표시 지움
+                }
+                else //선택된 행(Row)가 없을 경우 기존 선택 행(Row)를 모두 지우고 선택한 행(Row)를 추가
+                {
+                    selectedRows.Clear();
+                    selectedRows.Add(row);
+                }
+            }
+            else
+            {
+                if (Control.ModifierKeys == Keys.Shift && selectedRows.Count > 0)
+                {
+                    int index = selectedRows[0];
+                    int begin = Math.Min(row, index);
+                    int end = Math.Max(row, index);
+                    selectedRows.Clear();
+                    for (int i = begin; i <= end; i++)
+                    {
+                        selectedRows.Add(i);
+                    }
+                }
+                else if (Control.ModifierKeys == Keys.Control)
+                {
+                    if (selectedRows.Contains(row)) selectedRows.Remove(row);   //선택된 행(Row)을 다시 선택할 경우 제거해서 행(Row) 선택 무효화
+                    else selectedRows.Add(row); //선택된 행(Row)를 추가
+                }
+            }
+            //Row를 선택하면 EditBox를 감춘다.
+            editBox.Visible = false;
+        }
         #endregion Method
 
         #region Event
+        /// <summary>
+        /// Append Row
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         protected void OnMenu_AppenRow_Click(object sender, EventArgs e)
         {
             AppendRow();
+        }
+
+        /// <summary>
+        /// 선택한 행(Row) 삭제
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        protected void OnMenu_DeleteRow_Click(object sender, EventArgs e)
+        {
+            if (selectedRows.Count > 0)
+            {
+                for (int i = 0; i < selectedRows.Count; i++)
+                {
+                    int crntRow = selectedRows[i];
+                    DeleteRow(crntRow);
+                    RebuildSelectedRowsIndex(crntRow);
+                }
+                selectedRows.Clear();
+            }
+        }
+
+        /// <summary>
+        /// 선택 Row 앞에 행(Row)을 추가
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        protected void OnMenu_BeforeInsertRow_Click(object sender, EventArgs e)
+        {
+            int crntRow = ActiveCell.Row;
+            BeforeInsert(crntRow);
+        }
+
+        /// <summary>
+        /// 선택 Row 뒤에 행(Row)을 추가
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        protected void OnMenu_AfterInsertRow_Click(object sender, EventArgs e)
+        {
+            int crntRow = ActiveCell.Row;
+            AfterInsert(crntRow);
         }
 
         private void WANIGrid_Load(object sender, EventArgs e)
@@ -898,6 +1121,11 @@ namespace WANI_Grid
             Invalidate();
         }
 
+        /// <summary>
+        /// Mouse Down Event
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void WANIGrid_MouseDown(object sender, MouseEventArgs e)
         {
             //마우스 우측 버튼 클릭 시 Context 메뉴 제공
@@ -905,10 +1133,8 @@ namespace WANI_Grid
             {
                 //WANIGrid Header 영역이 선택되어졌을 경우에는 메뉴 제공하지 않음.
                 if (e.Y < grid.TopHeaderHeight) return;
-                //마우스 우측 버튼이 클릭된 좌표 값을 얻어온다.
-                Point p = new Point(e.X, e.Y);
 
-                rightClickMenu.Show(this, p);
+                ShowContextMenu(sender, e);                
             }
             else if (e.Button == MouseButtons.Left)
             {
@@ -1007,42 +1233,7 @@ namespace WANI_Grid
             if (row < 0) return;    //row값이 -1이면 처리하지 않음
             if (e.X < leftHeaderWidth)  //맨 좌측의 첫 컬럼을 선택했을 시 Row를 선택하도록 처리
             {
-                if (Control.ModifierKeys != Keys.Control && Control.ModifierKeys != Keys.Shift)
-                {
-                    if (selectedRows.Contains(row))
-                    {
-                        if (selectedRows.Count > 1) //선택된 행(Row)이 2개 이상일 경우
-                        {
-                            selectedRows.Clear();   //여러 행(Row)가 선택된 경우 기존의 선택된 행(Row) 무효화
-                            selectedRows.Add(row);  //선택 행(Row) 추가
-                        }
-                        else selectedRows.Remove(row);  //동일한 행(Row)를 2번 선택하면 선택 표시 지움
-                    }
-                    else //선택된 행(Row)가 없을 경우 기존 선택 행(Row)를 모두 지우고 선택한 행(Row)를 추가
-                    {
-                        selectedRows.Clear();
-                        selectedRows.Add(row);
-                    }
-                }
-                else
-                {
-                    if (Control.ModifierKeys == Keys.Shift && selectedRows.Count > 0)
-                    {
-                        int index = selectedRows[0];
-                        int begin = Math.Min(row, index);
-                        int end = Math.Max(row, index);
-                        selectedRows.Clear();
-                        for (int i = begin; i <= end; i++)
-                        {
-                            selectedRows.Add(i);
-                        }
-                    }
-                    else if (Control.ModifierKeys == Keys.Control)
-                    {
-                        if (selectedRows.Contains(row)) selectedRows.Remove(row);   //선택된 행(Row)을 다시 선택할 경우 제거해서 행(Row) 선택 무효화
-                        else selectedRows.Add(row); //선택된 행(Row)를 추가
-                    }
-                }                
+                SelectedRowsChangeColor(row);
             }
             else //WANIGrid Control 내부의 Content 영역을 마우스 좌측 버튼으로 클릭했을 때
             {
@@ -1065,7 +1256,8 @@ namespace WANI_Grid
                 {
                     ActiveCell.Row = row;
                     ActiveCell.Col = col;
-                    EndEdit(); 
+                    EndEdit();
+                    SelectedRowsChangeColor(ActiveCell.Row);
                 }
             }
         }
