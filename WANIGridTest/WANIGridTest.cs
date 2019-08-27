@@ -36,5 +36,94 @@ namespace WANIGridTest
             //ContextMenu 숨기기 - 아래의 주석을 풀면 됨
             //this.waniGrid.IsShowContextMenu = false;
         }
+
+        /// <summary>
+        /// Context Menu 보여주기
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void BtnContextMenuShow_Click(object sender, EventArgs e)
+        {
+            this.waniGrid.IsShowContextMenu = true;
+        }
+
+        /// <summary>
+        /// Context Menu 숨기기
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void BtnContextMenuHide_Click(object sender, EventArgs e)
+        {
+            this.waniGrid.IsShowContextMenu = false;
+        }
+
+        /// <summary>
+        /// 이전 행(Row) 추가
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void BtnBeforeInsertRow_Click(object sender, EventArgs e)
+        {
+            if (this.waniGrid.SelectedRows.Count < 1)
+            {
+                MessageBox.Show("행(Row)을 선택하셔야 합니다.", "확인", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            int crntRow = this.waniGrid.ActiveCell.Row;
+            this.waniGrid.BeforeInsert(crntRow);
+        }
+
+        /// <summary>
+        /// 다음 행(Row) 추가
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void BtnAtferInsertRow_Click(object sender, EventArgs e)
+        {
+            if (this.waniGrid.SelectedRows.Count < 1)
+            {
+                MessageBox.Show("행(Row)을 선택하셔야 합니다.", "확인", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            int crntRow = this.waniGrid.ActiveCell.Row;
+            this.waniGrid.AfterInsert(crntRow);
+        }
+
+        /// <summary>
+        /// 행(Row) 추가
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void BtnAddRow_Click(object sender, EventArgs e)
+        {
+            this.waniGrid.AppendRow();
+        }
+
+        /// <summary>
+        /// 행(Row) 삭제
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void BtnDeleteRow_Click(object sender, EventArgs e)
+        {
+            if (this.waniGrid.SelectedRows.Count < 1)
+            {
+                MessageBox.Show("삭제할 행(Row)을 선택하셔야 합니다.", "확인", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            if (this.waniGrid.SelectedRows.Count > 0)
+            {
+                for (int i = 0; i < this.waniGrid.SelectedRows.Count; i++)
+                {
+                    int crntRow = this.waniGrid.SelectedRows[i];
+                    this.waniGrid.DeleteRow(crntRow);
+                    this.waniGrid.RebuildSelectedRowsIndex(crntRow);
+                }
+                this.waniGrid.SelectedRows.Clear();
+            }
+        }
     }
 }
