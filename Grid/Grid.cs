@@ -98,11 +98,19 @@ namespace WANI_Grid.Grid
 
         #region Method
 
-        public void DrawHeader(Graphics graphics, Rectangle rect, int clientWidth)
+        public void DrawHeader(Graphics graphics, Rectangle rect, int clientWidth, int colFixed)
         {
             if (headerGen != null)
             {
-                headerGen.DrawHeaders(firstVisibleCol, lastVisibleCol, clientWidth, graphics, rect);
+                if (colFixed < 0) colFixed = 0;
+                if (colFixed == 0)
+                {
+                    headerGen.DrawHeaders(firstVisibleCol, lastVisibleCol, clientWidth, graphics, rect);
+                }
+                else
+                {
+                    headerGen.DrawHeaders(colFixed, firstVisibleCol, lastVisibleCol, clientWidth, graphics, rect);
+                }
             }
         }
 

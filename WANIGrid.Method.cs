@@ -38,12 +38,46 @@ namespace WANI_Grid
             }
             else
             {
-                for (col = firstVisibleCol; col < lastVisibleCol; col++)
+                if (colFixed == 0)
                 {
-                    if (!grid.GridHeaderList[col].Visible) continue;
-                    int width = grid.GridHeaderList[col].Width;
-                    if (X < width + tempWidth) break;
-                    tempWidth += width;
+                    for (col = firstVisibleCol; col < lastVisibleCol; col++)
+                    {
+                        if (!grid.GridHeaderList[col].Visible) continue;
+                        int width = grid.GridHeaderList[col].Width;
+                        if (X < width + tempWidth) break;
+                        tempWidth += width;
+                    }
+                }
+                else
+                {
+                    bool fixColSelected = false;
+                    int fixCol = GetLastFixedCol();
+                    for (col = 0; col <= fixCol && col <= lastVisibleCol; col++)
+                    {
+                        if (!grid.GridHeaderList[col].Visible) continue;
+                        int width = grid.GridHeaderList[col].Width;
+                        if (X < width + tempWidth)
+                        {
+                            fixColSelected = true;
+                            break;
+                        }
+                        tempWidth += width;
+                    }
+
+                    if (!fixColSelected)
+                    {
+                        int fixColWidth = GetFixedColWidth();
+
+                        for (col = firstVisibleCol + fixCol + 1; col <= lastVisibleCol; col++)
+                        {
+                            if (col < fixCol) continue;
+
+                            if (!grid.GridHeaderList[col].Visible) continue;
+                            int width = grid.GridHeaderList[col].Width;
+                            if (X < width + tempWidth) break;
+                            tempWidth += width;
+                        }
+                    }
                 }
             }
             if (col > grid.GridHeaderList.Count - 1) col = -1;
@@ -177,17 +211,34 @@ namespace WANI_Grid
             {
                 int i;
                 int tempPos;
-
+                int fixCol = GetLastFixedCol();
                 if (grid.GridHeaderList.Count > 0)
                 {
                     Header lastHeaderColumn = grid.GridHeaderList.Where(x => x.Visible == true).Last();
-                    for (i = firstVisibleCol, tempPos = 0; i < grid.GridHeaderList.Count && tempPos < Width - ysclWidth - leftHeaderWidth; i++)
+
+                    if (colFixed == 0)
                     {
-                        if (grid.GridHeaderList[i].Visible) tempPos += grid.GridHeaderList[i].Width;
+                        for (i = firstVisibleCol, tempPos = 0; i < grid.GridHeaderList.Count && tempPos < Width - ysclWidth - leftHeaderWidth; i++)
+                        {
+                            if (grid.GridHeaderList[i].Visible) tempPos += grid.GridHeaderList[i].Width;
+                        }
+                    }
+                    else
+                    {
+                        int fixedWidth = GetFixedColWidth() + leftHeaderWidth;
+                        for (i = firstVisibleCol, tempPos = fixedWidth; i < grid.GridHeaderList.Count && tempPos < Width - ysclWidth - leftHeaderWidth; i++)
+                        {
+                            if (grid.GridHeaderList[i].Visible) tempPos += grid.GridHeaderList[i].Width;
+                        }
                     }
 
-                    lastVisibleCol = i - 1;
-                    grid.LastVisibleCol = lastVisibleCol;
+                    if (i <= grid.GridHeaderList.Count)
+                    {
+                        lastVisibleCol = i + 1;
+                        if (lastVisibleCol >= lastHeaderColumn.Index) lastVisibleCol = lastHeaderColumn.Index;
+                        grid.LastVisibleCol = lastVisibleCol;
+                    }
+
                     if (lastVisibleCol < 0)
                     {
                         lastVisibleCol = 0;
@@ -219,34 +270,43 @@ namespace WANI_Grid
             rc.Inflate(-1, -1);
             g.FillRectangle(new SolidBrush(SystemColors.ControlLightLight), rc);
 
+            int lastFixedCol = GetLastFixedCol();
+
             //선택된 컬럼의 Background를 그린다.
-            for (int i = 0; i < selectedCols.Count; i++)
-            {
-                int index = selectedCols[i];
-                int left = leftHeaderWidth;
-
-                for (int j = firstVisibleCol; j < lastVisibleCol && j < index; j++)
-                {
-                    if (!grid.GridHeaderList[j].Visible) continue;
-                    left += grid.GridHeaderList[j].Width;
-                }
-
-                if (allRowsHeight > 0)
-                {
-                    g.FillRectangle(selectedColor, left + 1, topHeaderHeight, grid.GridHeaderList[index].Width + 1, allRowsHeight - (rowHeight * firstVisibleRow) + 1);
-                }
-            }
+            SelectedColChangeBackground(g, lastFixedCol);
 
             //선택된 행(Row)의 Background를 그린다.
+            SelectedRowChangeBackground(g, lastFixedCol);
+        }
+
+        /// <summary>
+        /// 선택된 행(Row)의 Background를 그린다.
+        /// </summary>
+        /// <param name="g"></param>
+        /// <param name="lastFixedCol"></param>
+        private void SelectedRowChangeBackground(Graphics g, int lastFixedCol)
+        {
             for (int i = 0; i < selectedRows.Count; i++)
             {
                 int index = selectedRows[i];
                 int top = topHeaderHeight;
                 int width = 0;
 
-                for (int k = firstVisibleCol; k <= lastVisibleCol; k++)
+                if (colFixed == 0)
                 {
-                    width += grid.GridHeaderList[k].Width;
+                    for (int k = firstVisibleCol; k <= lastVisibleCol; k++)
+                    {
+                        width += grid.GridHeaderList[k].Width;
+                    }
+                }
+                else
+                {
+                    width = GetFixedColWidth();
+                    for (int k = firstVisibleCol + lastFixedCol + 1; k <= lastVisibleCol; k++)
+                    {
+                        if (!grid.GridHeaderList[k].Visible) continue;
+                        width += grid.GridHeaderList[k].Width;
+                    }
                 }
 
                 for (int j = firstVisibleRow; j < lastVisibleRow && j < index; j++)
@@ -258,15 +318,81 @@ namespace WANI_Grid
         }
 
         /// <summary>
+        /// 선택된 컬럼의 Background를 그린다.
+        /// </summary>
+        /// <param name="g"></param>
+        /// <param name="lastFixedCol"></param>
+        private void SelectedColChangeBackground(Graphics g, int lastFixedCol)
+        {            
+            //선택된 컬럼의 Background를 그린다.
+            for (int i = 0; i < selectedCols.Count; i++)
+            {
+                int index = selectedCols[i];
+                int left = leftHeaderWidth;
+
+                if (colFixed == 0)
+                {
+                    for (int j = firstVisibleCol; j < lastVisibleCol && j < index; j++)
+                    {
+                        if (!grid.GridHeaderList[j].Visible) continue;
+                        left += grid.GridHeaderList[j].Width;
+                    }
+                }
+                else
+                {
+                    if (index <= lastFixedCol)
+                    {
+                        for (int j = 0; j < index; j++)
+                        {
+                            if (!grid.GridHeaderList[j].Visible) continue;
+                            left += grid.GridHeaderList[j].Width;
+                        }
+                    }
+                    else
+                    {
+                        left += GetFixedColWidth();
+                        for (int j = firstVisibleCol + lastFixedCol + 1; j < lastVisibleCol && j < index; j++)
+                        {
+                            if (!grid.GridHeaderList[j].Visible) continue;
+                            left += grid.GridHeaderList[j].Width;
+                        }
+                    }
+                }
+
+                if (allRowsHeight > 0)
+                {
+                    if (colFixed == 0)
+                    {
+                        if (index >= firstVisibleCol)
+                        {
+                            g.FillRectangle(selectedColor, left + 1, topHeaderHeight, grid.GridHeaderList[index].Width + 1, allRowsHeight - (rowHeight * firstVisibleRow) + 1);
+                        }
+                    }
+                    else
+                    {
+                        if (index > firstVisibleCol + lastFixedCol)
+                        {
+                            g.FillRectangle(selectedColor, left + 1, topHeaderHeight, grid.GridHeaderList[index].Width + 1, allRowsHeight - (rowHeight * firstVisibleRow) + 1);
+                        }
+                        else if (index <= lastFixedCol)
+                        {
+                            g.FillRectangle(selectedColor, left + 1, topHeaderHeight, grid.GridHeaderList[index].Width + 1, allRowsHeight - (rowHeight * firstVisibleRow) + 1);
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// Grid의 Header 그리기
         /// </summary>
         /// <param name="g"></param>
         /// <param name="rc"></param>
-        private void DrawHeaders(Graphics g, Rectangle rc)
+        private void DrawHeaders(Graphics g, Rectangle rc, int colFixed)
         {
             if (grid != null)
             {
-                grid.DrawHeader(g, rc, rc.Width);
+                grid.DrawHeader(g, rc, rc.Width, colFixed);
             }
         }
 
@@ -282,18 +408,92 @@ namespace WANI_Grid
 
             if (rows.Count <= 0) return;
             g.Clip = new Region(new Rectangle(1, topHeaderHeight, Width - ysclWidth + 2, Height - xsclHeight - topHeaderHeight));
-
-            try
+            
+            int columnStartY = topHeaderHeight;
+            for (int i = firstVisibleRow; i <= lastVisibleRow && i < rows.Count; i++)
             {
-                int columnStartY = topHeaderHeight;
-                for (int i = firstVisibleRow; i <= lastVisibleRow && i < rows.Count; i++)
-                {
-                    int columnStartX = 0;
-                    int columnWidth = 0;
+                int columnStartX = 0;
+                int columnWidth = 0;
 
-                    for (int j = firstVisibleCol; j <= lastVisibleCol && j < grid.GridHeaderList.Count; j++)
+                //고정 컬럼이 없을 경우
+                if (colFixed == 0)
+                {
+                    g.FillRectangle(brush, 1, columnStartY + 1, leftHeaderWidth, rowHeight);
+                    g.DrawRectangle(pen, 1, columnStartY + 1, leftHeaderWidth, rowHeight);
+                    columnStartX += leftHeaderWidth;  //첫 시작컬럼의 폭을 leftHeaderWidth 만큼 설정                                                                
+
+                    for (int j = firstVisibleCol; j <= lastVisibleCol; j++)
                     {
                         Col col = new Col(this.grid.HeaderGen.GetHeaders(), rows[i].DataRow);
+                        string content = col.GetColText(j);                        
+
+                        if (!grid.GridHeaderList[j].Visible) continue;
+
+                        //보여지는 컬럼의 폭이 컨트롤의 폭 보다 클경우
+                        if (columnStartX + grid.GridHeaderList[j].Width > controlWidth)
+                        {
+                            columnWidth = controlWidth - columnStartX - 3;
+                            g.DrawRectangle(pen, columnStartX + 1, columnStartY + 1, columnWidth, rowHeight);                            
+                            Rectangle rec = new Rectangle(columnStartX + 2, columnStartY + 2, columnWidth - 2, rowHeight);
+                            DrawStringAlignment(content, rec, g, col.Alignment);
+                        }
+                        else
+                        {
+                            columnWidth = grid.GridHeaderList[j].Width;
+                            g.DrawRectangle(pen, columnStartX + 1, columnStartY + 1, columnWidth, rowHeight);                            
+                            Rectangle rec = new Rectangle(columnStartX + 2, columnStartY + 2, columnWidth - 2, rowHeight);
+                            DrawStringAlignment(content, rec, g, col.Alignment);
+                        }
+                        columnStartX += columnWidth;
+                    }
+
+                    columnStartY += rowHeight;
+                }
+                else  //고정 컬럼이 있을 경우
+                {
+                    int fixCol = GetLastFixedCol();
+
+                    Col col = new Col(this.grid.HeaderGen.GetHeaders(), rows[i].DataRow);
+                    for (int index = 0; index <= fixCol; index++)
+                    {
+                        if (index == 0)
+                        {
+                            g.FillRectangle(brush, 1, columnStartY + 1, leftHeaderWidth, rowHeight);
+                            g.DrawRectangle(pen, 1, columnStartY + 1, leftHeaderWidth, rowHeight);
+                            columnStartX += leftHeaderWidth;  //첫 시작컬럼의 폭을 leftHeaderWidth 만큼 설정                                            
+                        }
+
+                        if (!col.ColHeaders[index].Visible)
+                        {
+                            continue;
+                        }
+
+                        string content = col.GetColText(index);                        
+
+                        //보여지는 컬럼의 폭이 컨트롤의 폭 보다 클경우
+                        if (columnStartX + grid.GridHeaderList[index].Width > controlWidth)
+                        {
+                            columnWidth = controlWidth - columnStartX - 3;
+                            g.FillRectangle(colFixBrush, columnStartX + 1, columnStartY + 1, columnWidth, rowHeight);
+                            g.DrawRectangle(pen, columnStartX + 1, columnStartY + 1, columnWidth, rowHeight);
+                            Rectangle rec = new Rectangle(columnStartX + 2, columnStartY + 2, columnWidth - 2, rowHeight);
+                            DrawStringAlignment(content, rec, g, col.Alignment);
+                        }
+                        else
+                        {
+                            columnWidth = grid.GridHeaderList[index].Width;
+                            g.FillRectangle(colFixBrush, columnStartX + 1, columnStartY + 1, columnWidth, rowHeight);
+                            g.DrawRectangle(pen, columnStartX + 1, columnStartY + 1, columnWidth, rowHeight);
+                            Rectangle rec = new Rectangle(columnStartX + 2, columnStartY + 2, columnWidth - 2, rowHeight);
+                            DrawStringAlignment(content, rec, g, col.Alignment);
+                        }
+                        columnStartX += columnWidth;
+                    }
+
+                    int lastFixCol = fixCol + 1;
+                    for (int j = firstVisibleCol + lastFixCol; j <= lastVisibleCol && j < grid.GridHeaderList.Count; j++)
+                    {
+                        col = new Col(this.grid.HeaderGen.GetHeaders(), rows[i].DataRow);
                         string content = col.GetColText(j);
                         if (j == firstVisibleCol)
                         {
@@ -325,10 +525,47 @@ namespace WANI_Grid
                     columnStartY += rowHeight;
                 }
             }
-            catch (Exception e)
+        }
+
+        /// <summary>
+        /// FixedCol 수에 맞는 Header의 Index값을 리턴
+        /// fixedCol 2이지만 실제 Header Column의 Visible 값이 false인 경우 제외하고 실제 Header Column의 Index를 구한다.
+        /// </summary>
+        /// <returns></returns>
+        private int GetLastFixedCol()
+        {
+            int lastFixedCol = 0;
+            int startIndex = 0;
+            foreach (Header head in grid.GridHeaderList)
             {
-                MessageBox.Show(e.Message);
+                if (startIndex == colFixed) break;
+                if (head.Visible)
+                {
+                    lastFixedCol = head.Index;
+                    startIndex++;                    
+                }                                               
             }
+            return lastFixedCol;
+        }
+
+        /// <summary>
+        /// 고정 컬럼의 전체 폭을 구한다.
+        /// </summary>
+        /// <returns></returns>
+        private int GetFixedColWidth()
+        {
+            int fixedColsWidth = 0;
+            int startIndex = 0;
+            foreach (Header head in grid.GridHeaderList)
+            {
+                if (startIndex == colFixed) break;
+                if (head.Visible)
+                {
+                    fixedColsWidth += head.Width;
+                    startIndex++;
+                }
+            }
+            return fixedColsWidth;
         }
 
         /// <summary>
@@ -386,7 +623,7 @@ namespace WANI_Grid
         protected Rectangle GetSelectedCellRect(int row, int col)
         {
             if (row < firstVisibleRow || row > lastVisibleRow) return new Rectangle(0, 0, 0, 0);
-            if (col < firstVisibleCol || col > lastVisibleCol) return new Rectangle(0, 0, 0, 0);
+            if ((colFixed == 0 && col < firstVisibleCol) || col > lastVisibleCol) return new Rectangle(0, 0, 0, 0);
 
             //선택된 Cell의 높이를 구한다.
             int top = topHeaderHeight;
@@ -405,24 +642,70 @@ namespace WANI_Grid
 
             int left = leftHeaderWidth + 2;
             int width = 0;
-            for (int i = firstVisibleCol; i <= lastVisibleCol; i++)
-            {
-                if (!grid.GridHeaderList[i].Visible) continue;
 
-                //보여지는 컬럼의 폭이 컨트롤의 폭 보다 클경우
-                if (left + grid.GridHeaderList[i].Width > this.Width)
+            if (colFixed == 0)
+            { 
+                for (int i = firstVisibleCol; i <= lastVisibleCol; i++)
                 {
-                    width = this.Width - left - 1;
-                }
-                else
-                {
-                    width = grid.GridHeaderList[i].Width;
-                }
+                    if (!grid.GridHeaderList[i].Visible) continue;
 
-                if (col == i) break;
-                left += width;
+                    //보여지는 컬럼의 폭이 컨트롤의 폭 보다 클경우
+                    if (left + grid.GridHeaderList[i].Width > this.Width)
+                    {
+                        width = this.Width - left - 1;
+                    }
+                    else
+                    {
+                        width = grid.GridHeaderList[i].Width;
+                    }
+
+                    if (col == i) break;
+                    if (i > col) return new Rectangle(0, 0, 0, 0);
+                    left += width;
+                }
             }
+            else
+            {
+                int fixCol = GetLastFixedCol();
+                for (int i = 0; i <= fixCol; i++)
+                {
+                    if (!grid.GridHeaderList[i].Visible) continue;
+                    //보여지는 컬럼의 폭이 컨트롤의 폭 보다 클경우
+                    if (left + grid.GridHeaderList[i].Width > this.Width)
+                    {
+                        width = this.Width - left - 1;
+                    }
+                    else
+                    {
+                        width = grid.GridHeaderList[i].Width;
+                    }
+                    
+                    if (col == i) break;
+                    left += width;                    
+                }
 
+                if (col > fixCol)
+                {
+                    for (int i = firstVisibleCol + fixCol + 1; i <= lastVisibleCol; i++)
+                    {
+                        if (!grid.GridHeaderList[i].Visible) continue;
+
+                        //보여지는 컬럼의 폭이 컨트롤의 폭 보다 클경우
+                        if (left + grid.GridHeaderList[i].Width > this.Width)
+                        {
+                            width = this.Width - left - 1;
+                        }
+                        else
+                        {
+                            width = grid.GridHeaderList[i].Width;
+                        }
+
+                        if (col == i) break;
+                        if (i > col) return new Rectangle(0, 0, 0, 0);
+                        left += width;
+                    }
+                }
+            }
             return new Rectangle(left - 1, top + 1, width - 1, height - 1);
         }
 

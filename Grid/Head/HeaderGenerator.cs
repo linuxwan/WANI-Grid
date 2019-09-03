@@ -63,5 +63,27 @@ namespace WANI_Grid.Grid.Head
         public abstract List<Header> GetHeaders();
         public abstract void HeaderClear();
         public abstract void DrawHeaders(int firstVisibleCol, int lastVisibleCol, int controlWidth, Graphics graphics, Rectangle rect);
+        public abstract void DrawHeaders(int colFixed, int firstVisibleCol, int lastVisibleCol, int controlWidth, Graphics graphics, Rectangle rect);
+
+        /// <summary>
+        /// FixedCol 수에 맞는 Header의 Index값을 리턴
+        /// fixedCol 2이지만 실제 Header Column의 Visible 값이 false인 경우 제외하고 실제 Header Column의 Index를 구한다.
+        /// </summary>
+        /// <returns></returns>
+        protected int GetLastFixedCol(int colFixed)
+        {
+            int lastFixedCol = 0;
+            int startIndex = 0;
+            foreach (Header head in _headers)
+            {
+                if (startIndex == colFixed) break;
+                if (head.Visible)
+                {
+                    lastFixedCol = head.Index;
+                    startIndex++;
+                }
+            }
+            return lastFixedCol;
+        }
     }
 }

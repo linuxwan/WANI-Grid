@@ -63,10 +63,12 @@ namespace WANI_Grid
         private TextBox editBox = null;
         private GridState gridState = GridState.NONE;
         private SolidBrush blackBrush = new SolidBrush(Color.Black);
+        private SolidBrush colFixBrush = new SolidBrush(SystemColors.ControlLight); //고정컬럼 배경색
         private bool vSpliteLineMouseDown = false;  //컬럼 경계선 상에서 마우스 좌측버튼이 눌러졌는지를 저장하기 위한 변수
         private int resizeCol = 0;  //사이즈 변경이 발생한 컬럼을 저장하기 위한 변수
         private Point lastMousePoint = new Point(0, 0); //마우스 좌측 버튼을 누른 상태에서 마지막 이동 Point를 저장하기 위한 변수
         private bool isShowContextMenu = true;    //ContextMenu 제공 여부
+        private int colFixed = 0;   //고정 컬럼 개수(Column Header형태)
         #endregion
 
         #region Property
@@ -161,6 +163,15 @@ namespace WANI_Grid
         public List<int> SelectedCols
         {
             get { return selectedCols; }
+        }
+
+        /// <summary>
+        /// 고정 컬럼 개수
+        /// </summary>
+        public int ColFixed
+        {
+            get { return colFixed; }
+            set { colFixed = value; }
         }
         #endregion Property
 

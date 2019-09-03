@@ -113,7 +113,7 @@ namespace WANI_Grid
             CalcVisibleRange();
             ReCalcScrollBars();
             DrawBackground(e.Graphics, rc);
-            DrawHeaders(e.Graphics, rc);
+            DrawHeaders(e.Graphics, rc, colFixed);
             DrawContent(e.Graphics, rc, this.ClientRectangle.Width);
             DrawActiveCell(e.Graphics);
         }
@@ -327,17 +327,58 @@ namespace WANI_Grid
             Cursor = Cursors.Default;
             if (grid.GridHeaderList.Count > 0 && e.Y < topHeaderHeight)
             {
-                int colLine = leftHeaderWidth; //각 컬럼이 끝나는 지점의 X좌표를 저장하는 변수
-                for (int i = firstVisibleCol; i <= lastVisibleCol; i++)
+                int colLine = leftHeaderWidth; //각 컬럼이 끝나는 지점의 X좌표를 저장하는 변수                
+                int lastFixCol = GetLastFixedCol();
+                int fixedColWidth = GetFixedColWidth();
+
+                if (colFixed == 0)
                 {
-                    if (!grid.GridHeaderList[i].Visible) continue;
-                    colLine += grid.GridHeaderList[i].Width;
-                    //Header의 컬럼과 컬럼 간의 경계선 상에 마우스 포인트가 위치했을 경우
-                    if (e.X > colLine - 2 && e.X < colLine + 2)
+                    for (int i = firstVisibleCol; i <= lastVisibleCol; i++)
                     {
-                        Cursor = Cursors.VSplit;
-                        resizeCol = i;
-                        break;
+                        if (!grid.GridHeaderList[i].Visible) continue;
+                        colLine += grid.GridHeaderList[i].Width;
+
+                        //Header의 컬럼과 컬럼 간의 경계선 상에 마우스 포인트가 위치했을 경우
+                        if ((e.X > colLine - 2 && e.X < colLine + 2))
+                        {
+                            Cursor = Cursors.VSplit;
+                            resizeCol = i;
+                            if (resizeCol >= grid.GridHeaderList.Count) resizeCol = grid.GridHeaderList.Count - 1;
+                            break;
+                        }
+                    }
+                } else
+                {
+                    for (int i = 0; i <= lastFixCol; i++)
+                    {
+                        if (!grid.GridHeaderList[i].Visible) continue;
+                        colLine += grid.GridHeaderList[i].Width;
+
+                        //Header의 컬럼과 컬럼 간의 경계선 상에 마우스 포인트가 위치했을 경우
+                        if ((e.X > colLine - 2 && e.X < colLine + 2))
+                        {
+                            Cursor = Cursors.VSplit;
+                            resizeCol = i;
+                            if (resizeCol >= grid.GridHeaderList.Count) resizeCol = grid.GridHeaderList.Count - 1;
+                            break;
+                        }
+                    }
+
+                    colLine = leftHeaderWidth + fixedColWidth;
+                    for (int i = firstVisibleCol + colFixed; i <= lastVisibleCol; i++)
+                    {
+                        if (i <= lastFixCol) continue;
+                        if (!grid.GridHeaderList[i].Visible) continue;
+                        colLine += grid.GridHeaderList[i].Width;
+
+                        //Header의 컬럼과 컬럼 간의 경계선 상에 마우스 포인트가 위치했을 경우
+                        if ((e.X > colLine - 2 && e.X < colLine + 2))
+                        {
+                            Cursor = Cursors.VSplit;
+                            resizeCol = i;
+                            if (resizeCol >= grid.GridHeaderList.Count) resizeCol = grid.GridHeaderList.Count - 1;
+                            break;
+                        }
                     }
                 }
             }
@@ -396,27 +437,30 @@ namespace WANI_Grid
                     {
                         firstVisibleCol = e.NewValue;
                         grid.FirstVisibleCol = firstVisibleCol;
+                        if (e.NewValue + firstVisibleCol >= grid.GridHeaderList.Count - 1) grid.LastVisibleCol = grid.GridHeaderList.Count - 1;                        
+                        lastHScrollValue = ((lastVisibleCol - firstVisibleCol) + 1) / 2 + 1;
                         chkLast = false;
                     }
                 }
             }
             else
             {
-                if (e.NewValue < (grid.GridHeaderList.Count - lastHScrollValue))
+                if (e.NewValue <= (grid.GridHeaderList.Count - lastHScrollValue))
                 {
                     if (firstVisibleCol < grid.LastVisibleCol && grid.LastVisibleCol != (grid.GridHeaderList.Count - 1))
                     {
                         firstVisibleCol = e.NewValue;
                         grid.FirstVisibleCol = firstVisibleCol;
-                        lastHScrollValue = grid.LastVisibleCol;
+                        if (e.NewValue + firstVisibleCol >= grid.GridHeaderList.Count - 1) grid.LastVisibleCol = grid.GridHeaderList.Count - 1;
+                        lastHScrollValue = ((lastVisibleCol - firstVisibleCol) + 1) / 2 + 1;
                         chkLast = false;
                     }
-                    else if (e.NewValue < firstVisibleCol)
+                    else if (e.NewValue < firstVisibleCol || e.NewValue < (lastVisibleCol - e.NewValue) || e.NewValue < lastVisibleCol)
                     {
                         firstVisibleCol = e.NewValue;
                         grid.FirstVisibleCol = firstVisibleCol;
                         chkLast = false;
-                    }
+                    }                           
                 }
             }
             CalcVisibleRange();

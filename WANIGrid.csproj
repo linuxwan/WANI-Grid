@@ -63,6 +63,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>LanguageResource.ko-KR.resx</DependentUpon>
     </Compile>
+    <Compile Include="Util\DrawUtil.cs" />
     <Compile Include="Util\StringUtil.cs" />
     <Compile Include="WANIGrid.cs">
       <SubType>UserControl</SubType>

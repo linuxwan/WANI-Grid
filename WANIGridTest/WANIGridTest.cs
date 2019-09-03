@@ -35,6 +35,8 @@ namespace WANIGridTest
             this.waniGrid.SetHeader(builder);
             //ContextMenu 숨기기 - 아래의 주석을 풀면 됨
             //this.waniGrid.IsShowContextMenu = false;
+            //고정 컬럼 설정
+            this.waniGrid.ColFixed = 2;
         }
 
         /// <summary>
