@@ -50,20 +50,21 @@
             this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(613, 74);
+            this.panel1.Size = new System.Drawing.Size(656, 74);
             this.panel1.TabIndex = 1;
             // 
             // groupBox1
             // 
+            this.groupBox1.AutoSize = true;
             this.groupBox1.Controls.Add(this.btnDeleteRow);
             this.groupBox1.Controls.Add(this.btnAddRow);
             this.groupBox1.Controls.Add(this.btnAtferInsertRow);
             this.groupBox1.Controls.Add(this.btnBeforeInsertRow);
             this.groupBox1.Controls.Add(this.btnContextMenuHide);
             this.groupBox1.Controls.Add(this.btnContextMenuShow);
-            this.groupBox1.Location = new System.Drawing.Point(6, 0);
+            this.groupBox1.Location = new System.Drawing.Point(6, 1);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(601, 69);
+            this.groupBox1.Size = new System.Drawing.Size(643, 81);
             this.groupBox1.TabIndex = 6;
             this.groupBox1.TabStop = false;
             // 
@@ -134,12 +135,13 @@
             this.panel2.Location = new System.Drawing.Point(0, 74);
             this.panel2.Name = "panel2";
             this.panel2.Padding = new System.Windows.Forms.Padding(5, 0, 5, 5);
-            this.panel2.Size = new System.Drawing.Size(613, 298);
+            this.panel2.Size = new System.Drawing.Size(656, 330);
             this.panel2.TabIndex = 2;
             // 
             // waniGrid
             // 
             this.waniGrid.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.waniGrid.ColFixed = 0;
             this.waniGrid.DataSource = null;
             this.waniGrid.Dock = System.Windows.Forms.DockStyle.Fill;
             grid1.FirstVisibleCol = 0;
@@ -157,20 +159,21 @@
             this.waniGrid.LeftHeaderWidth = 22;
             this.waniGrid.Location = new System.Drawing.Point(5, 0);
             this.waniGrid.Name = "waniGrid";
-            this.waniGrid.Size = new System.Drawing.Size(603, 293);
+            this.waniGrid.Size = new System.Drawing.Size(646, 325);
             this.waniGrid.TabIndex = 1;
             // 
             // WANIGridTest
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(613, 372);
+            this.ClientSize = new System.Drawing.Size(656, 404);
             this.Controls.Add(this.panel2);
             this.Controls.Add(this.panel1);
             this.Name = "WANIGridTest";
             this.Text = "WANI Grid Test";
             this.Load += new System.EventHandler(this.WANIGridTest_Load);
             this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.panel2.ResumeLayout(false);
             this.ResumeLayout(false);

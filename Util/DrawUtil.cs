@@ -46,7 +46,14 @@ namespace WANI_Grid.Util
 
             //헤더 타이틀을 그린다.
             Rectangle colRec = new Rectangle(columnStartX + 1, 1, headerWidth, topHeaderHeight);
-            graphics.DrawString(headers[index].Title, headerFont, blackBrush, colRec, sf);
+            if (headers == null)
+            {
+                graphics.DrawString("", headerFont, blackBrush, colRec, sf);
+            }
+            else
+            {
+                graphics.DrawString(headers[index].Title, headerFont, blackBrush, colRec, sf);
+            }
         }
     }
 }

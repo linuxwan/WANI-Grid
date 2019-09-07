@@ -271,12 +271,67 @@ namespace WANI_Grid
             g.FillRectangle(new SolidBrush(SystemColors.ControlLightLight), rc);
 
             int lastFixedCol = GetLastFixedCol();
-
+            if (lastFixedCol == -1)
+            {
+                DrawDefaultWANIGridControl(g, rc);
+                return;
+            }
             //선택된 컬럼의 Background를 그린다.
             SelectedColChangeBackground(g, lastFixedCol);
 
             //선택된 행(Row)의 Background를 그린다.
             SelectedRowChangeBackground(g, lastFixedCol);
+        }
+
+        /// <summary>
+        /// 디자인 시에 WANIGrid Control을 WinForm 위에 올렸을 때 보여지는 WANIGrid Control의 외형을 그린다.
+        /// </summary>
+        /// <param name="g"></param>
+        /// <param name="rc"></param>
+        private void DrawDefaultWANIGridControl(Graphics g, Rectangle rc)
+        {
+            //WANIGrid Control의 폭과 높이에 해당하는 row와 column의 갯수를 구한다. (컬럼 폭은 80으로 고정)
+            int cols = (rc.Width / 80) + 1;
+            int rows = (rc.Height / rowHeight) + 1;
+
+            SolidBrush brush = new SolidBrush(SystemColors.ControlLight);
+            Pen pen = new Pen(Color.LightGray);
+
+            int columnStartX = 0;
+            g.FillRectangle(brush, columnStartX + 1, 1, leftHeaderWidth, topHeaderHeight);
+            g.DrawRectangle(pen, columnStartX + 1, 1, leftHeaderWidth, topHeaderHeight);
+
+            columnStartX += leftHeaderWidth;  //첫 시작컬럼의 폭을 leftHeaderWidth 만큼 설정 
+
+            for (int i = 0; i < cols; i++)
+            {                
+                int headerWidth = 80;   //i 번째 컬럼의 폭을 설정                                                    
+
+                //Grid Header를 그린다.
+                DrawUtil.DrawGridHeaderRectangleAndText(g, brush, blackBrush, pen, null, headerFont, i, columnStartX, headerWidth, topHeaderHeight);
+
+                columnStartX += headerWidth;
+            }
+            vScrollBar.Visible = true;
+
+            for (int i = 0; i < rows; i++)
+            {
+                columnStartX = 0;
+                g.FillRectangle(brush, columnStartX + 1, i * rowHeight, leftHeaderWidth, topHeaderHeight);
+                g.DrawRectangle(pen, columnStartX + 1, i * rowHeight, leftHeaderWidth, topHeaderHeight);
+                columnStartX += leftHeaderWidth;
+
+                for (int j = 0; j < cols; j++)
+                {                    
+                    int colWidth = 80;
+                                                
+                    g.DrawRectangle(pen, columnStartX + 1, i * rowHeight, colWidth, rowHeight);
+                    Rectangle rec = new Rectangle(columnStartX + 2, (i * rowHeight) + 2, columnStartX - 2, rowHeight);                        
+
+                    columnStartX += colWidth;                    
+                }
+            }
+            hScrollBar.Visible = true;
         }
 
         /// <summary>
@@ -323,7 +378,8 @@ namespace WANI_Grid
         /// <param name="g"></param>
         /// <param name="lastFixedCol"></param>
         private void SelectedColChangeBackground(Graphics g, int lastFixedCol)
-        {            
+        {
+            if (selectedCols == null) return;
             //선택된 컬럼의 Background를 그린다.
             for (int i = 0; i < selectedCols.Count; i++)
             {
@@ -534,6 +590,7 @@ namespace WANI_Grid
         /// <returns></returns>
         private int GetLastFixedCol()
         {
+            if (grid.GridHeaderList == null) return -1;
             int lastFixedCol = 0;
             int startIndex = 0;
             foreach (Header head in grid.GridHeaderList)

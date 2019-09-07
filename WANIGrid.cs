@@ -26,7 +26,8 @@ namespace WANI_Grid
         ACTIVE,
         EDIT
     }
-
+    
+    [ToolboxBitmap(typeof(WANIGrid), "WANIGrid")]
     public partial class WANIGrid : UserControl
     {
         #region 변수
