@@ -225,7 +225,7 @@ namespace WANI_Grid
                     }
                     else
                     {
-                        int fixedWidth = GetFixedColWidth() + leftHeaderWidth;
+                        int fixedWidth = GetFixedColWidth();
                         for (i = firstVisibleCol, tempPos = fixedWidth; i < grid.GridHeaderList.Count && tempPos < Width - ysclWidth - leftHeaderWidth; i++)
                         {
                             if (grid.GridHeaderList[i].Visible) tempPos += grid.GridHeaderList[i].Width;
