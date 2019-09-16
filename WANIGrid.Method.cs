@@ -772,7 +772,7 @@ namespace WANI_Grid
         private void BeginEdit()
         {
             if (readOnly) return;
-
+            if (grid.GridHeaderList[ActiveCell.Col].Editable == false) return;
             if (ActiveCell.Col != -1 && ActiveCell.Row != -1)
             {
                 string tempStr = "";
@@ -788,6 +788,7 @@ namespace WANI_Grid
                 editBox.Height = r.Height;
                 editBox.Width = r.Width - 3;
                 editBox.Visible = true;
+                editBox.TextAlign = grid.GridHeaderList[ActiveCell.Col].TextAlign;
                 editBox.Focus();
                 ActiveCell_ActvieCol = ActiveCell.Col; //ActivieCell_ActiveCol 값을 설정   
             }
@@ -888,6 +889,30 @@ namespace WANI_Grid
                 rowHeight = Font.Height + 4;    //1개 Row의 높이 값을 rowHeight 변수에 저장
                 OnRowsChanged();
             }
+        }
+
+        /// <summary>
+        /// DataTable을 WANIGrid에 설정한다.
+        /// </summary>
+        /// <param name="dt"></param>
+        public void SetDataTable(DataTable dt)
+        {
+            if (dt == null) return;
+            if (dataSource.Rows.Count > 0)
+            {             
+                rows.Clear();
+                allRowsHeight = 0;
+            }
+            int count = 0;
+            foreach (DataRow row in dt.Rows)
+            {
+                Row r = new Row(row);
+                rows.Insert(count, r);
+                if (rowHeight == 0) rowHeight = Font.Height + 4;
+                allRowsHeight += rowHeight;
+                count++;
+            }
+            Invalidate();
         }
 
         /// <summary>

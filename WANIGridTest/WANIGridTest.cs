@@ -21,8 +21,8 @@ namespace WANIGridTest
         private void WANIGridTest_Load(object sender, EventArgs e)
         {
             HeaderBuilder builder = new HeaderBuilder(this.waniGrid.GridDisplayType);
-            builder.AddHeader(new DefaultHeader("Col01", "Column 01", 80, HorizontalAlignment.Center, HorizontalAlignment.Left, true));
-            builder.AddHeader(new DefaultHeader("Col02", "Column 02", 80, HorizontalAlignment.Center, HorizontalAlignment.Right, true));
+            builder.AddHeader(new DefaultHeader("Col01", "Column 01", 80, HorizontalAlignment.Center, HorizontalAlignment.Left, true, false));
+            builder.AddHeader(new DefaultHeader("Col02", "Column 02", 80, HorizontalAlignment.Center, HorizontalAlignment.Right, true, false));
             builder.AddHeader(new DefaultHeader("Col03", "Column 03", 90, HorizontalAlignment.Center, HorizontalAlignment.Left, true));
             builder.AddHeader(new DefaultHeader("Col04", "Column 04", 100, HorizontalAlignment.Center, HorizontalAlignment.Center, true));
             builder.AddHeader(new DefaultHeader("Col05", "Column 05", 110, HorizontalAlignment.Center, HorizontalAlignment.Left, true));
@@ -31,14 +31,15 @@ namespace WANIGridTest
             builder.AddHeader(new DefaultHeader("Col08", "Column 08", 100, HorizontalAlignment.Center, HorizontalAlignment.Left, true));
             builder.AddHeader(new DefaultHeader("Col09", "Column 09", 80, HorizontalAlignment.Center, HorizontalAlignment.Center, true));
             builder.AddHeader(new DefaultHeader("Col10", "Column 10", 90, HorizontalAlignment.Center, HorizontalAlignment.Left, true));
+            builder.AddHeader(new DefaultHeader("Col11", "Column 11", 90, HorizontalAlignment.Center, HorizontalAlignment.Left, true));
             builder.InitializeHeader();
             this.waniGrid.SetHeader(builder);
             //ContextMenu 숨기기 - 아래의 주석을 풀면 됨
             //this.waniGrid.IsShowContextMenu = false;
             //고정 컬럼 설정
-            this.waniGrid.ColFixed = 2;
+            this.waniGrid.ColFixed = 2;            
         }
-
+        
         /// <summary>
         /// Context Menu 보여주기
         /// </summary>
@@ -126,6 +127,108 @@ namespace WANIGridTest
                 }
                 this.waniGrid.SelectedRows.Clear();
             }
+        }
+
+        /// <summary>
+        /// DataTable에서 데이터 가져오기
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void BtnGetDataTable_Click(object sender, EventArgs e)
+        {
+            DataTable dataTable = makeDataTable();
+            this.waniGrid.DataSource = dataTable;
+        }
+
+        private DataTable makeDataTable()
+        {
+            DataTable dt = new DataTable("DataTable");
+
+            DataColumn col1 = new DataColumn();
+            col1.DataType = System.Type.GetType("System.String");
+            col1.ColumnName = "Col01";
+            dt.Columns.Add(col1);
+
+            DataColumn col2 = new DataColumn();
+            col2.DataType = System.Type.GetType("System.Int32");
+            col2.ColumnName = "Col02";
+            dt.Columns.Add(col2);
+
+            DataColumn col3 = new DataColumn();
+            col3.DataType = System.Type.GetType("System.String");
+            col3.ColumnName = "Col03";
+            dt.Columns.Add(col3);
+
+            DataColumn col4 = new DataColumn();
+            col4.DataType = System.Type.GetType("System.Int32");
+            col4.ColumnName = "Col04";
+            dt.Columns.Add(col4);
+
+            DataColumn col5 = new DataColumn();
+            col5.DataType = System.Type.GetType("System.String");
+            col5.ColumnName = "Col05";
+            dt.Columns.Add(col5);
+
+            DataColumn col6 = new DataColumn();
+            col6.DataType = System.Type.GetType("System.Int32");
+            col6.ColumnName = "Col06";
+            dt.Columns.Add(col6);
+
+            DataColumn col7 = new DataColumn();
+            col7.DataType = System.Type.GetType("System.String");
+            col7.ColumnName = "Col07";
+            dt.Columns.Add(col7);
+
+            DataColumn col8 = new DataColumn();
+            col8.DataType = System.Type.GetType("System.Int32");
+            col8.ColumnName = "Col08";
+            dt.Columns.Add(col8);
+
+            DataColumn col9 = new DataColumn();
+            col9.DataType = System.Type.GetType("System.String");
+            col9.ColumnName = "Col09";
+            dt.Columns.Add(col9);
+
+            DataColumn col10 = new DataColumn();
+            col10.DataType = System.Type.GetType("System.Int32");
+            col10.ColumnName = "Col10";
+            dt.Columns.Add(col10);
+
+            DataColumn col11 = new DataColumn();
+            col11.DataType = System.Type.GetType("System.String");
+            col11.ColumnName = "Col11";
+            dt.Columns.Add(col11);
+
+            for (int i = 0; i < 10000; i++)
+            {
+                DataRow dr = dt.NewRow();
+
+                for (int j = 1; j <= 11; j++)
+                {
+                    string colId = String.Empty;
+                    if (j < 10)
+                    {
+                        colId += "Col0" + j;
+                    }
+                    else
+                    {
+                        colId = "Col" + j;
+                    }
+
+                    if (j % 2 == 1)
+                    {
+                        dr[colId] = "Test " + (i + 1);
+                    }
+                    else
+                    {
+                        dr[colId] = i + 1;
+                    }
+                }
+
+                dt.Rows.Add(dr);
+            }
+
+            return dt;
         }
     }
 }

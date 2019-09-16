@@ -26,6 +26,17 @@ namespace WANI_Grid.Grid.Head
             this.Visible = true;
         }
 
+        public DefaultHeader(string fieldName, string title, int width, HorizontalAlignment headAlign, HorizontalAlignment txtAlign, bool visible, bool editable)
+        {
+            this.ColumnId = fieldName;
+            this.Title = title;
+            this.Width = width;
+            this.HeadAlign = headAlign;
+            this.TextAlign = txtAlign;
+            this.Visible = visible;
+            this.Editable = editable;
+        }
+
         public DefaultHeader(string fieldName, string title, int width, HorizontalAlignment headAlign, HorizontalAlignment txtAlign, bool visible)
         {
             this.ColumnId = fieldName;

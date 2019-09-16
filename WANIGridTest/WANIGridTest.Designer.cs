@@ -31,6 +31,7 @@
             WANI_Grid.Grid.Grid grid1 = new WANI_Grid.Grid.Grid();
             this.panel1 = new System.Windows.Forms.Panel();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.btnGetDataTable = new System.Windows.Forms.Button();
             this.btnDeleteRow = new System.Windows.Forms.Button();
             this.btnAddRow = new System.Windows.Forms.Button();
             this.btnAtferInsertRow = new System.Windows.Forms.Button();
@@ -50,27 +51,38 @@
             this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(656, 74);
+            this.panel1.Size = new System.Drawing.Size(751, 80);
             this.panel1.TabIndex = 1;
             // 
             // groupBox1
             // 
             this.groupBox1.AutoSize = true;
+            this.groupBox1.Controls.Add(this.btnGetDataTable);
             this.groupBox1.Controls.Add(this.btnDeleteRow);
             this.groupBox1.Controls.Add(this.btnAddRow);
             this.groupBox1.Controls.Add(this.btnAtferInsertRow);
             this.groupBox1.Controls.Add(this.btnBeforeInsertRow);
             this.groupBox1.Controls.Add(this.btnContextMenuHide);
             this.groupBox1.Controls.Add(this.btnContextMenuShow);
-            this.groupBox1.Location = new System.Drawing.Point(6, 1);
+            this.groupBox1.Location = new System.Drawing.Point(6, -6);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(643, 81);
+            this.groupBox1.Size = new System.Drawing.Size(740, 85);
             this.groupBox1.TabIndex = 6;
             this.groupBox1.TabStop = false;
             // 
+            // btnGetDataTable
+            // 
+            this.btnGetDataTable.Location = new System.Drawing.Point(309, 17);
+            this.btnGetDataTable.Name = "btnGetDataTable";
+            this.btnGetDataTable.Size = new System.Drawing.Size(134, 23);
+            this.btnGetDataTable.TabIndex = 12;
+            this.btnGetDataTable.Text = "DataTable 가져오기";
+            this.btnGetDataTable.UseVisualStyleBackColor = true;
+            this.btnGetDataTable.Click += new System.EventHandler(this.BtnGetDataTable_Click);
+            // 
             // btnDeleteRow
             // 
-            this.btnDeleteRow.Location = new System.Drawing.Point(231, 38);
+            this.btnDeleteRow.Location = new System.Drawing.Point(231, 42);
             this.btnDeleteRow.Name = "btnDeleteRow";
             this.btnDeleteRow.Size = new System.Drawing.Size(75, 23);
             this.btnDeleteRow.TabIndex = 11;
@@ -80,7 +92,7 @@
             // 
             // btnAddRow
             // 
-            this.btnAddRow.Location = new System.Drawing.Point(231, 13);
+            this.btnAddRow.Location = new System.Drawing.Point(231, 17);
             this.btnAddRow.Name = "btnAddRow";
             this.btnAddRow.Size = new System.Drawing.Size(75, 23);
             this.btnAddRow.TabIndex = 10;
@@ -90,7 +102,7 @@
             // 
             // btnAtferInsertRow
             // 
-            this.btnAtferInsertRow.Location = new System.Drawing.Point(145, 38);
+            this.btnAtferInsertRow.Location = new System.Drawing.Point(145, 42);
             this.btnAtferInsertRow.Name = "btnAtferInsertRow";
             this.btnAtferInsertRow.Size = new System.Drawing.Size(83, 23);
             this.btnAtferInsertRow.TabIndex = 9;
@@ -100,7 +112,7 @@
             // 
             // btnBeforeInsertRow
             // 
-            this.btnBeforeInsertRow.Location = new System.Drawing.Point(145, 13);
+            this.btnBeforeInsertRow.Location = new System.Drawing.Point(145, 17);
             this.btnBeforeInsertRow.Name = "btnBeforeInsertRow";
             this.btnBeforeInsertRow.Size = new System.Drawing.Size(83, 23);
             this.btnBeforeInsertRow.TabIndex = 8;
@@ -110,7 +122,7 @@
             // 
             // btnContextMenuHide
             // 
-            this.btnContextMenuHide.Location = new System.Drawing.Point(8, 38);
+            this.btnContextMenuHide.Location = new System.Drawing.Point(8, 42);
             this.btnContextMenuHide.Name = "btnContextMenuHide";
             this.btnContextMenuHide.Size = new System.Drawing.Size(134, 23);
             this.btnContextMenuHide.TabIndex = 7;
@@ -120,7 +132,7 @@
             // 
             // btnContextMenuShow
             // 
-            this.btnContextMenuShow.Location = new System.Drawing.Point(8, 13);
+            this.btnContextMenuShow.Location = new System.Drawing.Point(8, 17);
             this.btnContextMenuShow.Name = "btnContextMenuShow";
             this.btnContextMenuShow.Size = new System.Drawing.Size(134, 23);
             this.btnContextMenuShow.TabIndex = 6;
@@ -132,10 +144,10 @@
             // 
             this.panel2.Controls.Add(this.waniGrid);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel2.Location = new System.Drawing.Point(0, 74);
+            this.panel2.Location = new System.Drawing.Point(0, 80);
             this.panel2.Name = "panel2";
             this.panel2.Padding = new System.Windows.Forms.Padding(5, 0, 5, 5);
-            this.panel2.Size = new System.Drawing.Size(656, 330);
+            this.panel2.Size = new System.Drawing.Size(751, 374);
             this.panel2.TabIndex = 2;
             // 
             // waniGrid
@@ -159,14 +171,14 @@
             this.waniGrid.LeftHeaderWidth = 22;
             this.waniGrid.Location = new System.Drawing.Point(5, 0);
             this.waniGrid.Name = "waniGrid";
-            this.waniGrid.Size = new System.Drawing.Size(646, 325);
+            this.waniGrid.Size = new System.Drawing.Size(741, 369);
             this.waniGrid.TabIndex = 1;
             // 
             // WANIGridTest
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(656, 404);
+            this.ClientSize = new System.Drawing.Size(751, 454);
             this.Controls.Add(this.panel2);
             this.Controls.Add(this.panel1);
             this.Name = "WANIGridTest";
@@ -192,6 +204,7 @@
         private System.Windows.Forms.Button btnBeforeInsertRow;
         private System.Windows.Forms.Button btnContextMenuHide;
         private System.Windows.Forms.Button btnContextMenuShow;
+        private System.Windows.Forms.Button btnGetDataTable;
     }
 }
 

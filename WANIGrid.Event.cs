@@ -476,19 +476,18 @@ namespace WANI_Grid
         private void VScrollBar_Scroll(object sender, ScrollEventArgs e)
         {
             EndEdit();
-            firstVisibleRow = e.NewValue / rowHeight;
-            if (firstVisibleRow > (allRowsHeight / rowHeight)) return;
+            firstVisibleRow = e.NewValue / rowHeight;            
 
-            if (firstVisibleRow >= (allRowsHeight / rowHeight) - rowsCount)
+            if (firstVisibleRow > (allRowsHeight / rowHeight) - (Height / rowHeight) + 5)
             {
-                firstVisibleRow = (allRowsHeight / rowHeight) - rowsCount;
+                firstVisibleRow = (allRowsHeight / rowHeight) - (Height / rowHeight) + 5;
                 grid.FirstVisibleRow = firstVisibleRow;
                 vScrollBar.Value = vScrollBar.Maximum;
             }
             else
             {
                 grid.FirstVisibleRow = firstVisibleRow;
-                vScrollBar.Value = firstVisibleRow * rowHeight;
+                vScrollBar.Value = firstVisibleRow * rowHeight;                
             }
 
             CalcVisibleRange();
@@ -545,9 +544,9 @@ namespace WANI_Grid
                 {
                     if (rowsCount == 0) return; // rowsCount가 0일 경우는 Row의 Height가 Control Height를 넘지 않았음
                     firstVisibleRow += 2;
-                    if (firstVisibleRow >= (allRowsHeight / rowHeight) - rowsCount)
+                    if (firstVisibleRow > (allRowsHeight / rowHeight) - (Height / rowHeight) + 5)
                     {
-                        firstVisibleRow = (allRowsHeight / rowHeight) - rowsCount;
+                        firstVisibleRow = rowsCount - (Height / rowHeight) + 5;
                         grid.FirstVisibleRow = firstVisibleRow;
                         vScrollBar.Value = vScrollBar.Maximum;
                     }

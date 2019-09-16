@@ -108,7 +108,10 @@ namespace WANI_Grid
         public DataTable DataSource
         {
             get { return dataSource; }
-            set { dataSource = value; }
+            set {                
+                dataSource = value;
+                SetDataTable(dataSource);
+            }
         }
 
         [Category("Font"), Description("The header font")]
