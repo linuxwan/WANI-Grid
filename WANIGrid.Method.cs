@@ -351,7 +351,7 @@ namespace WANI_Grid
                 {
                     for (int k = firstVisibleCol; k <= lastVisibleCol; k++)
                     {
-                        width += grid.GridHeaderList[k].Width;
+                        if (grid.GridHeaderList[k].Visible) width += grid.GridHeaderList[k].Width;
                     }
                 }
                 else
@@ -359,8 +359,7 @@ namespace WANI_Grid
                     width = GetFixedColWidth();
                     for (int k = firstVisibleCol + lastFixedCol + 1; k <= lastVisibleCol; k++)
                     {
-                        if (!grid.GridHeaderList[k].Visible) continue;
-                        width += grid.GridHeaderList[k].Width;
+                        if (grid.GridHeaderList[k].Visible) width += grid.GridHeaderList[k].Width;
                     }
                 }
 

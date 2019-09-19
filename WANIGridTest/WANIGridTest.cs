@@ -21,8 +21,8 @@ namespace WANIGridTest
         private void WANIGridTest_Load(object sender, EventArgs e)
         {
             HeaderBuilder builder = new HeaderBuilder(this.waniGrid.GridDisplayType);
-            builder.AddHeader(new DefaultHeader("Col01", "Column 01", 80, HorizontalAlignment.Center, HorizontalAlignment.Left, true, false));
-            builder.AddHeader(new DefaultHeader("Col02", "Column 02", 80, HorizontalAlignment.Center, HorizontalAlignment.Right, true, false));
+            builder.AddHeader(new DefaultHeader("Col01", "Column 01", 80, HorizontalAlignment.Center, HorizontalAlignment.Left, true));
+            builder.AddHeader(new DefaultHeader("Col02", "Column 02", 80, HorizontalAlignment.Center, HorizontalAlignment.Right, false));
             builder.AddHeader(new DefaultHeader("Col03", "Column 03", 90, HorizontalAlignment.Center, HorizontalAlignment.Left, true));
             builder.AddHeader(new DefaultHeader("Col04", "Column 04", 100, HorizontalAlignment.Center, HorizontalAlignment.Center, true));
             builder.AddHeader(new DefaultHeader("Col05", "Column 05", 110, HorizontalAlignment.Center, HorizontalAlignment.Left, true));
@@ -37,7 +37,7 @@ namespace WANIGridTest
             //ContextMenu 숨기기 - 아래의 주석을 풀면 됨
             //this.waniGrid.IsShowContextMenu = false;
             //고정 컬럼 설정
-            this.waniGrid.ColFixed = 2;            
+            this.waniGrid.ColFixed = 0;            
         }
         
         /// <summary>
@@ -199,7 +199,7 @@ namespace WANIGridTest
             col11.ColumnName = "Col11";
             dt.Columns.Add(col11);
 
-            for (int i = 0; i < 10000; i++)
+            for (int i = 0; i < 100000; i++)
             {
                 DataRow dr = dt.NewRow();
 
