@@ -51,11 +51,13 @@
     <Compile Include="Grid\Element\RowCollection.cs" />
     <Compile Include="Grid\Grid.cs" />
     <Compile Include="Grid\GridType.cs" />
+    <Compile Include="Grid\Head\YearMonthWeekNoDayHeader.cs" />
     <Compile Include="Grid\Head\Header.cs" />
     <Compile Include="Grid\Head\HeaderBuilder.cs" />
     <Compile Include="Grid\Head\HeaderGenerator.cs" />
     <Compile Include="Grid\Head\DefaultHeader.cs" />
     <Compile Include="Grid\Head\DefaultHeaderGenerator.cs" />
+    <Compile Include="Grid\Head\YearMonthWeekNoDayHeaderGenerator.cs" />
     <Compile Include="Resources\LanguageResource.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -66,7 +68,8 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>LanguageResource.ko-KR.resx</DependentUpon>
     </Compile>
-    <Compile Include="Util\DrawUtil.cs" />
+    <Compile Include="Util\DateUtil.cs" />
+    <Compile Include="Util\DrawTextUtil.cs" />
     <Compile Include="Util\StringUtil.cs" />
     <Compile Include="WANIGrid.cs">
       <SubType>UserControl</SubType>

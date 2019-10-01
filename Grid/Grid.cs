@@ -25,6 +25,10 @@ namespace WANI_Grid.Grid
         private int lastVisibleCol = 0;     //화면상에서 마지막에보여질 컬럼    
         private int firstVisibleRow = 0;    //화면상에서 처음 보여질 로우
         private int lastVisibleRow = 0;     //화면상에서 마지막에보여질 로우                
+
+        private Dictionary<int, List<DateTime>> dicWeekDay = null;
+        private Dictionary<string, List<DateTime>> dicMonthDay = null;
+
         #endregion 변수
 
         #region Property
@@ -94,22 +98,34 @@ namespace WANI_Grid.Grid
             get { return lastVisibleRow; }
             set { lastVisibleRow = value; }
         }
+
+        public Dictionary<int, List<DateTime>> DicWeekDay
+        {
+            get { return dicWeekDay; }
+            set { dicWeekDay = value; }
+        }
+
+        public Dictionary<string, List<DateTime>> DicMonthDay
+        {
+            get { return dicMonthDay; }
+            set { dicMonthDay = value; }
+        }
         #endregion Property
 
         #region Method
 
-        public void DrawHeader(Graphics graphics, Rectangle rect, int clientWidth, int colFixed)
+        public void DrawHeader(Graphics graphics, Rectangle rect, int clientWidth, int colFixed, bool fixedColEditable)
         {
             if (headerGen != null)
             {
                 if (colFixed < 0) colFixed = 0;
                 if (colFixed == 0)
-                {
+                {                    
                     headerGen.DrawHeaders(firstVisibleCol, lastVisibleCol, clientWidth, graphics, rect);
                 }
                 else
                 {
-                    headerGen.DrawHeaders(colFixed, firstVisibleCol, lastVisibleCol, clientWidth, graphics, rect);
+                    headerGen.DrawHeaders(colFixed, firstVisibleCol, lastVisibleCol, clientWidth, graphics, rect, fixedColEditable);
                 }
             }
         }

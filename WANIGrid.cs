@@ -39,6 +39,7 @@ namespace WANI_Grid
         private int ysclWidth = 0;
         private int firstVisibleCol = 0;    //화면상에서 처음 보여져야할 컬럼
         private int lastVisibleCol = 0;     //화면상에서 마지막에보여질 컬럼    
+        private int currentCol = 0; //현재 첫페이지
         private int firstVisibleRow = 0;    //화면상에서 처음 보여져야할 로우
         private int lastVisibleRow = 0;     //화면상에서 마지막에 보여질 로우
         private int leftHeaderWidth = 22; //Grid의 맨 왼쪽 빈Column Width
@@ -47,7 +48,7 @@ namespace WANI_Grid
         private int lastHScrollValue = 0; //가로 스크롤바를 최대값까지 갔을 경우 보여지는 컬럼 수를 2로 나눈 값
         private bool chkLast = false; //마지막 컬럼의 폭을 제대로 보여주었을 때 true
         private ContextMenu rightClickMenu = null;  //Mouse 우측 버튼 클릭 시 제공되는 메뉴
-        private Font headerFont = new Font("맑은 고딕", 9, FontStyle.Bold);
+        private Font headerFont = new Font("맑은 고딕", 9, FontStyle.Bold);                 
         private Font contentFont = new Font("맑은 고딕", 9);
         private int rowHeight = 0;
         private RowCollection rows;
@@ -57,6 +58,7 @@ namespace WANI_Grid
         private List<int> selectedRows = new List<int>();   //선택된 행(Rows)들을 관리하기 위한 변수
         private Point mousePoint = new Point(0, 0);
         private SolidBrush selectedColor = new SolidBrush(Color.LightCyan);
+        private SolidBrush holidayColorBrush = new SolidBrush(Color.LightSkyBlue); //휴일색상
         public Cell ActiveCell = new Cell(-1, -1);
         private int ActiveCell_ActiveRow = 0;
         private int ActiveCell_ActvieCol = -1;
@@ -70,6 +72,7 @@ namespace WANI_Grid
         private Point lastMousePoint = new Point(0, 0); //마우스 좌측 버튼을 누른 상태에서 마지막 이동 Point를 저장하기 위한 변수
         private bool isShowContextMenu = true;    //ContextMenu 제공 여부
         private int colFixed = 0;   //고정 컬럼 개수(Column Header형태)
+        private bool fixedColEditable = true;   //고정 컬럼 수정 여부
         #endregion
 
         #region Property
@@ -123,7 +126,7 @@ namespace WANI_Grid
                 if (headerFont != value)
                 {
                     headerFont = value;
-                    topHeaderHeight = headerFont.Height + 4;
+                    if (topHeaderHeight <= headerFont.Height + 4) topHeaderHeight = headerFont.Height + 4;
                 }
             }
         }
@@ -151,6 +154,14 @@ namespace WANI_Grid
         }
 
         /// <summary>
+        /// 휴일 색상으로 채워주는 Brush 값을 가져오거나 설정한다.
+        /// </summary>
+        public SolidBrush HolidayColorBrush
+        {
+            get { return holidayColorBrush;}
+            set { holidayColorBrush = value; }
+        }
+        /// <summary>
         /// 마우스 우측 버튼 클릭 시 ContextMenu 제공 여부
         /// </summary>
         public bool IsShowContextMenu
@@ -177,13 +188,22 @@ namespace WANI_Grid
             get { return colFixed; }
             set { colFixed = value; }
         }
+
+        /// <summary>
+        /// 고정 컬럼 수정여부
+        /// </summary>
+        public bool FixedColEditable
+        {
+            get { return fixedColEditable; }
+            set { fixedColEditable = value; }
+        }
         #endregion Property
 
         #region 생성자
         public WANIGrid()
         {
             InitializeComponent();
-            if (grid == null) grid = new WANI_Grid.Grid.Grid();
+            if (grid == null) grid = new WANI_Grid.Grid.Grid();            
             rows = new RowCollection();
             hScrollBar.SmallChange = 1;
             rowHeight = Font.Height + 4;
@@ -218,7 +238,7 @@ namespace WANI_Grid
 
             //세로 스크롤바 설정
             vScrollBar.Left = Width - vScrollBar.Width - 2;
-            vScrollBar.Top = topHeaderHeight + 2;
+            vScrollBar.Top = topHeaderHeight + 2;            
             vScrollBar.Height = Height - topHeaderHeight - hScrollBar.Height - 4;            
         }
 
@@ -253,8 +273,8 @@ namespace WANI_Grid
             //마우스 휠
             this.MouseWheel += new MouseEventHandler(Mouse_Wheel);
             //editBox TextChanged 이벤트
-            this.editBox.TextChanged += EditBox_TextChanged;
-        }        
-        #endregion 초기화       
+            this.editBox.TextChanged += EditBox_TextChanged;            
+        }
+        #endregion 초기화               
     }
 }

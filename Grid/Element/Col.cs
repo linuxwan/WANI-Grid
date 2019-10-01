@@ -92,11 +92,13 @@ namespace WANI_Grid.Grid.Element
             int colNo = 0;
             foreach (Header head in colHeaders)
             {
+                //Calendar의 날짜 표기 컬럼이면 빠져나간다.
+                if (head.IsDate) break;
                 //Column Header에서 해당 Column을 Visible true일 경우에만 값을 반환 - 화면에 Display하기 위함
                 if (head.Visible)
-                {
+                {                    
                     if (head.Index == index)
-                    {
+                    {                        
                         text = row[head.ColumnId].ToString();
                         alignment = head.TextAlign;
                     }

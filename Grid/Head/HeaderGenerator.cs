@@ -23,9 +23,16 @@ namespace WANI_Grid.Grid.Head
         protected bool isLargeLastCol = false;    //마지막 컬럼의 폭이 Client 폭 보다 클 경우 true
         protected Font headerFont = new Font("맑은 고딕", 9);
         protected SolidBrush blackBrush = new SolidBrush(Color.Black);
+        protected GridType gridDisplayType = GridType.DefaultType;
         #endregion 변수
 
         #region Property
+        public GridType GridDisplayType
+        {
+            get { return gridDisplayType; }
+            set { gridDisplayType = value; }
+        }
+
         public int TopHeaderHeight
         {
             get { return topHeaderHeight; }
@@ -63,7 +70,7 @@ namespace WANI_Grid.Grid.Head
         public abstract List<Header> GetHeaders();
         public abstract void HeaderClear();
         public abstract void DrawHeaders(int firstVisibleCol, int lastVisibleCol, int controlWidth, Graphics graphics, Rectangle rect);
-        public abstract void DrawHeaders(int colFixed, int firstVisibleCol, int lastVisibleCol, int controlWidth, Graphics graphics, Rectangle rect);
+        public abstract void DrawHeaders(int colFixed, int firstVisibleCol, int lastVisibleCol, int controlWidth, Graphics graphics, Rectangle rect, bool fixedColEditable);
 
         /// <summary>
         /// FixedCol 수에 맞는 Header의 Index값을 리턴

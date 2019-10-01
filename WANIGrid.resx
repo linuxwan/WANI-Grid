@@ -120,19 +120,22 @@
   <data name="&gt;&gt;hScrollBar.Type" xml:space="preserve">
     <value>System.Windows.Forms.HScrollBar, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;$this.Type" xml:space="preserve">
-    <value>System.Windows.Forms.UserControl, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="&gt;&gt;vScrollBar.Parent" xml:space="preserve">
+    <value>$this</value>
   </data>
   <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="hScrollBar.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
   </data>
-  <data name="&gt;&gt;hScrollBar.Name" xml:space="preserve">
-    <value>hScrollBar</value>
+  <data name="&gt;&gt;$this.Type" xml:space="preserve">
+    <value>System.Windows.Forms.UserControl, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="$this.AutoScaleDimensions" type="System.Drawing.SizeF, System.Drawing">
     <value>96, 96</value>
+  </data>
+  <data name="vScrollBar.Size" type="System.Drawing.Size, System.Drawing">
+    <value>17, 150</value>
   </data>
   <data name="&gt;&gt;vScrollBar.Type" xml:space="preserve">
     <value>System.Windows.Forms.VScrollBar, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
@@ -149,14 +152,11 @@
   <data name="&gt;&gt;$this.Name" xml:space="preserve">
     <value>WANIGrid</value>
   </data>
-  <data name="&gt;&gt;vScrollBar.Parent" xml:space="preserve">
-    <value>$this</value>
-  </data>
   <data name="&gt;&gt;hScrollBar.Parent" xml:space="preserve">
     <value>$this</value>
   </data>
-  <data name="vScrollBar.Size" type="System.Drawing.Size, System.Drawing">
-    <value>17, 150</value>
+  <data name="&gt;&gt;hScrollBar.Name" xml:space="preserve">
+    <value>hScrollBar</value>
   </data>
   <data name="hScrollBar.Size" type="System.Drawing.Size, System.Drawing">
     <value>200, 17</value>

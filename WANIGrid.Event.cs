@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using WANI_Grid.Grid;
 using WANI_Grid.Grid.Head;
 /// <summary>
 /// 이 소스는 LGPL(GNU Lesser General Public Licence)를 따릅니다.
@@ -99,6 +100,7 @@ namespace WANI_Grid
             rc = new Rectangle(0, 0, this.ClientRectangle.Width, this.ClientRectangle.Height);
             ActiveCell.Clear();
             InitializeScollBar();
+            CalcVisibleRange();
             ReCalcScrollBars();
             Invalidate();
         }
@@ -113,7 +115,7 @@ namespace WANI_Grid
             CalcVisibleRange();
             ReCalcScrollBars();
             DrawBackground(e.Graphics, rc);
-            DrawHeaders(e.Graphics, rc, colFixed);
+            DrawHeaders(e.Graphics, rc, colFixed, fixedColEditable);
             DrawContent(e.Graphics, rc, this.ClientRectangle.Width);
             DrawActiveCell(e.Graphics);
         }
@@ -128,6 +130,7 @@ namespace WANI_Grid
             rc = new Rectangle(0, 0, this.ClientRectangle.Width, this.ClientRectangle.Height);
             ActiveCell.Clear();
             InitializeScollBar();
+            CalcVisibleRange();
             ReCalcScrollBars();
             Invalidate();
         }
@@ -142,6 +145,7 @@ namespace WANI_Grid
             rc = new Rectangle(0, 0, this.ClientRectangle.Width, this.ClientRectangle.Height);
             ActiveCell.Clear();
             InitializeScollBar();
+            CalcVisibleRange();
             ReCalcScrollBars();
             Invalidate();
         }
@@ -339,7 +343,7 @@ namespace WANI_Grid
                         colLine += grid.GridHeaderList[i].Width;
 
                         //Header의 컬럼과 컬럼 간의 경계선 상에 마우스 포인트가 위치했을 경우
-                        if ((e.X > colLine - 2 && e.X < colLine + 2))
+                        if (!grid.GridHeaderList[i].IsDate && (e.X > colLine - 2 && e.X < colLine + 2))
                         {
                             Cursor = Cursors.VSplit;
                             resizeCol = i;
@@ -355,7 +359,7 @@ namespace WANI_Grid
                         colLine += grid.GridHeaderList[i].Width;
 
                         //Header의 컬럼과 컬럼 간의 경계선 상에 마우스 포인트가 위치했을 경우
-                        if ((e.X > colLine - 2 && e.X < colLine + 2))
+                        if (!grid.GridHeaderList[i].IsDate && (e.X > colLine - 2 && e.X < colLine + 2))
                         {
                             Cursor = Cursors.VSplit;
                             resizeCol = i;
@@ -372,7 +376,7 @@ namespace WANI_Grid
                         colLine += grid.GridHeaderList[i].Width;
 
                         //Header의 컬럼과 컬럼 간의 경계선 상에 마우스 포인트가 위치했을 경우
-                        if ((e.X > colLine - 2 && e.X < colLine + 2))
+                        if (!grid.GridHeaderList[i].IsDate && (e.X > colLine - 2 && e.X < colLine + 2))
                         {
                             Cursor = Cursors.VSplit;
                             resizeCol = i;
@@ -397,6 +401,7 @@ namespace WANI_Grid
                 return;
             }
 
+            if (rows[ActiveCell.Row].DataRow == null) return;
             DataRow row = rows[ActiveCell.Row].DataRow;
             Header header = grid.GridHeaderList.Where(x => x.Index == ActiveCell.Col).FirstOrDefault();
             if (header != null)
@@ -413,6 +418,7 @@ namespace WANI_Grid
         public void HScrollBar_Scroll(object sender, ScrollEventArgs e)
         {
             EndEdit();
+            
             //가로 스크롤바를 움직여서 마지막 컬럼이 Client 영역에 나타났을 때
             if (e.NewValue >= (grid.GridHeaderList.Count - lastHScrollValue))
             {
@@ -428,6 +434,11 @@ namespace WANI_Grid
                             grid.FirstVisibleCol = firstVisibleCol;
                             e.NewValue = firstVisibleCol;
                             chkLast = true;
+                        } else if (chkLast)
+                        {
+                            firstVisibleCol = currentCol;
+                            grid.FirstVisibleCol = firstVisibleCol;
+                            chkLast = true;
                         }
                     }
                 }
@@ -440,6 +451,12 @@ namespace WANI_Grid
                         if (e.NewValue + firstVisibleCol >= grid.GridHeaderList.Count - 1) grid.LastVisibleCol = grid.GridHeaderList.Count - 1;                        
                         lastHScrollValue = ((lastVisibleCol - firstVisibleCol) + 1) / 2 + 1;
                         chkLast = false;
+                    } else if (e.NewValue + colFixed >= grid.GridHeaderList.Count - 1)
+                    {
+                        if (chkLast) firstVisibleCol = currentCol + 1;
+                        grid.FirstVisibleCol = firstVisibleCol;
+                        lastVisibleCol = grid.GridHeaderList.Count - 1;
+                        grid.LastVisibleCol = lastVisibleCol;
                     }
                 }
             }
@@ -459,7 +476,7 @@ namespace WANI_Grid
                     {
                         firstVisibleCol = e.NewValue;
                         grid.FirstVisibleCol = firstVisibleCol;
-                        chkLast = false;
+                        chkLast = true;
                     }                           
                 }
             }
@@ -559,6 +576,32 @@ namespace WANI_Grid
             }
             CalcVisibleRange();
             ReCalcScrollBars();
+            Invalidate();
+        }
+
+        /// <summary>
+        /// Control Key + : 폭 넓게
+        /// Control Key - : 폭 좁게
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void WANIGrid_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (this.grid.GridDisplayType != GridType.YearMonthWeekNoDayType) return;            
+
+            if (e.Control && e.KeyCode == Keys.Add)
+            {
+                foreach(YearMonthWeekNoDayHeader header in this.grid.GridHeaderList)
+                {
+                    if (header.IsDate) header.Width += 1;
+                }
+            } else if (e.Control && e.KeyCode == Keys.Subtract)
+            {
+                foreach (YearMonthWeekNoDayHeader header in this.grid.GridHeaderList)
+                {
+                    if (header.IsDate) header.Width -= 1;
+                }
+            }
             Invalidate();
         }
         #endregion Event                        

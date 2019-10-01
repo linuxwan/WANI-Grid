@@ -55,6 +55,7 @@
             this.ClientSizeChanged += new System.EventHandler(this.WANIGrid_ClientSizeChanged);
             this.SizeChanged += new System.EventHandler(this.WANIGrid_SizeChanged);
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.WANIGrid_Paint);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.WANIGrid_KeyDown);
             this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.WANIGrid_MouseDown);
             this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.WANIGrid_MouseMove);
             this.MouseUp += new System.Windows.Forms.MouseEventHandler(this.WANIGrid_MouseUp);

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using WANI_Grid.Grid;
 using WANI_Grid.Grid.Element;
 using WANI_Grid.Grid.Head;
 using WANI_Grid.Util;
@@ -118,17 +119,44 @@ namespace WANI_Grid
         public void SetHeader(HeaderBuilder headerBuilder)
         {
             if (grid == null) grid = new WANI_Grid.Grid.Grid();
-            if (headerBuilder != null) grid.HeaderGen = headerBuilder.HeaderGen;
+            if (headerBuilder != null)
+            {
+                grid.HeaderGen = headerBuilder.HeaderGen;
+                topHeaderHeight = headerBuilder.HeaderGen.TopHeaderHeight;
+                grid.DicWeekDay = headerBuilder.DicWeekDay;
+                grid.DicMonthDay = headerBuilder.DicMonthDay;
+            }
+
+            grid.GridDisplayType = headerBuilder.GridDisplayType;
+            grid.TopHeaderHeight = headerBuilder.HeaderGen.TopHeaderHeight;
+            InitializeScollBar();
 
             //dataSource가 null일 경우 Header정보를 근간으로 DataTable 생성
+            if (dataSource != null)
+            {
+                dataSource.Clear();
+                dataSource = null;
+                rows.Clear();
+                rowHeight = 0;
+                rowsCount = 0;
+                selectedCols.Clear();
+                selectedRows.Clear();
+                allRowsHeight = 0;                
+                vScrollBar.Maximum = allRowsHeight;
+                firstVisibleCol = 0;
+                lastVisibleCol = 0;
+                firstVisibleRow = 0;
+                lastVisibleRow = 0;
+            }
+
             if (dataSource == null)
             {
                 dataSource = new DataTable();
                 foreach (Header hd in grid.HeaderGen.GetHeaders())
                 {
                     dataSource.Columns.Add(new DataColumn(hd.ColumnId, typeof(string)));
-                }
-            }
+                }               
+            }                                    
         }
 
         /// <summary>
@@ -139,19 +167,32 @@ namespace WANI_Grid
             if (hScrollBar == null || vScrollBar == null) return;
 
             if (grid != null && grid.GridHeaderList != null) allColsWidth = grid.GridHeaderList[grid.GridHeaderList.Count() - 1].Left + grid.GridHeaderList[grid.GridHeaderList.Count() - 1].Width;
-
+            if (firstVisibleCol >= lastVisibleCol) return;
             //컬럼의 폭이 클라이언트 사이즈 폭 보다 클 경우 가로 스크롤바를 보여준다.
             if ((allColsWidth > 0) && (allColsWidth > ClientSize.Width - ysclWidth))
             {
                 hScrollBar.Visible = true;
                 hScrollBar.LargeChange = ((lastVisibleCol - firstVisibleCol) + 1) / 2 + 1;
                 lastHScrollValue = ((lastVisibleCol - firstVisibleCol) + 1) / 2 + 1;
+                hScrollBar.Maximum = grid.GridHeaderList.Count;
+
+                //가로 스크롤바가 나타났을 때 세로 스크롤바 설정
+                vScrollBar.Left = Width - vScrollBar.Width - 2;
+                vScrollBar.Top = topHeaderHeight + 2;
+                vScrollBar.Height = Height - topHeaderHeight - hScrollBar.Height - 4;
             }
             else
             {
                 hScrollBar.Visible = false;
-                grid.FirstVisibleCol = 0; //Control 크기가 바뀌면서 hScrollBar가 가려지면 Grid의 첫번째 컬럼 부터 그려지도록 처리
+                grid.FirstVisibleCol = 0; //Control 크기가 바뀌면서 hScrollBar가 숨겨지면 Grid의 첫번째 컬럼 부터 그려지도록 처리
+                firstVisibleCol = 0; //Control 크기가 바뀌면서 hScrollBar가 숨겨지면 Grid의 첫번째 컬럼 부터 그려지도록 처리                
+
+                //가로 스크롤바가 숨겨졌을 때 세로 스크롤바 설정
+                vScrollBar.Left = Width - vScrollBar.Width - 2;
+                vScrollBar.Top = 2;
+                vScrollBar.Height = Height - 4;
             }
+
             //로우의 높이가 클라이언트 사이즈 높이 보다 클 경우 세로 스크롤바를 보여준다.
             if (allRowsHeight > 0 && (allRowsHeight > Height - topHeaderHeight - xsclHeight))
             {
@@ -160,11 +201,21 @@ namespace WANI_Grid
                 vScrollBar.Maximum = allRowsHeight;
                 vScrollBar.LargeChange = rowHeight * 5;
                 vScrollBar.SmallChange = rowHeight;
+
+                //세로 스크롤바가 나타났을 때 가로 스크롤바 설정
+                hScrollBar.Left = 1;
+                hScrollBar.Width = Width - vScrollBar.Width - 2;
+                hScrollBar.Top = Height - hScrollBar.Height - 2;
             }
             else
             {
                 vScrollBar.Visible = false;
                 grid.FirstVisibleRow = 0;
+
+                //세로 스크롤바가 숨겨졌을 때 가로 스크롤바 설정
+                hScrollBar.Left = 1;
+                hScrollBar.Width = Width - 2;
+                hScrollBar.Top = Height - hScrollBar.Height - 2;
             }
         }
 
@@ -226,7 +277,7 @@ namespace WANI_Grid
                     else
                     {
                         int fixedWidth = GetFixedColWidth();
-                        for (i = firstVisibleCol, tempPos = fixedWidth; i < grid.GridHeaderList.Count && tempPos < Width; i++)
+                        for (i = firstVisibleCol + colFixed, tempPos = fixedWidth; i < grid.GridHeaderList.Count && tempPos < Width; i++)
                         {
                             if (grid.GridHeaderList[i].Visible) tempPos += grid.GridHeaderList[i].Width;
                         }
@@ -237,7 +288,7 @@ namespace WANI_Grid
                         lastVisibleCol = i + 1;
                         if (lastVisibleCol >= lastHeaderColumn.Index) lastVisibleCol = lastHeaderColumn.Index;
                         grid.LastVisibleCol = lastVisibleCol;
-                    }
+                    } 
 
                     if (lastVisibleCol < 0)
                     {
@@ -249,7 +300,9 @@ namespace WANI_Grid
                         lastVisibleCol = lastHeaderColumn.Index;
                         hScrollBar.Maximum = grid.GridHeaderList.Where(x => x.Visible == true).Count();
                         grid.LastVisibleCol = lastVisibleCol;
-                    }
+                        grid.FirstVisibleCol = firstVisibleCol;
+                        currentCol = firstVisibleCol + 1;
+                    } 
                 }
                 else
                 {
@@ -276,11 +329,54 @@ namespace WANI_Grid
                 DrawDefaultWANIGridControl(g, rc);
                 return;
             }
+
+            int enableFixCol = 0;
+            for (int i = 0; i <= lastFixedCol; i++)
+            {
+                YearMonthWeekNoDayHeader yearMonthHeader = grid.GridHeaderList[i] as YearMonthWeekNoDayHeader;
+                if (yearMonthHeader != null && yearMonthHeader.GetDateTime <= DateTime.MinValue) enableFixCol = i;
+            }
+            if (lastFixedCol > enableFixCol) lastFixedCol = enableFixCol;
+
             //선택된 컬럼의 Background를 그린다.
             SelectedColChangeBackground(g, lastFixedCol);
 
             //선택된 행(Row)의 Background를 그린다.
             SelectedRowChangeBackground(g, lastFixedCol);
+
+            //휴일 색상을 그린다
+            FillHolidayBackgroundColor(g);
+        }
+
+        private void FillHolidayBackgroundColor(Graphics g)
+        {
+            if (grid.GridDisplayType != GridType.YearMonthWeekNoDayType) return;
+            //고정 컬럼이 없을 경우
+            if (colFixed == 0)
+            {
+                int startX = leftHeaderWidth;
+                for (int i = firstVisibleCol; i <= lastVisibleCol; i++)
+                {
+                    YearMonthWeekNoDayHeader yearMonthHeader = grid.GridHeaderList[i] as YearMonthWeekNoDayHeader;                    
+                    if (yearMonthHeader.IsHoliday)
+                    {                        
+                        g.FillRectangle(holidayColorBrush, startX + 1, topHeaderHeight + 1, yearMonthHeader.Width, allRowsHeight - (rowHeight * firstVisibleRow) + 1);                        
+                    }
+                    startX += yearMonthHeader.Width;
+                }
+            } else
+            {
+                int startX = leftHeaderWidth + GetFixedColWidth();                
+                for (int i = firstVisibleCol + colFixed; i <= lastVisibleCol && i < grid.GridHeaderList.Count; i++)
+                {                    
+                    YearMonthWeekNoDayHeader yearMonthHeader = grid.GridHeaderList[i] as YearMonthWeekNoDayHeader;                    
+                    if (yearMonthHeader.IsHoliday)
+                    {                        
+                        g.FillRectangle(holidayColorBrush, startX + 1, topHeaderHeight + 1, yearMonthHeader.Width, allRowsHeight - (rowHeight * firstVisibleRow) + 1);                        
+                    }
+                    startX += grid.GridHeaderList[i].Width;
+                }
+            }
         }
 
         /// <summary>
@@ -308,7 +404,7 @@ namespace WANI_Grid
                 int headerWidth = 80;   //i 번째 컬럼의 폭을 설정                                                    
 
                 //Grid Header를 그린다.
-                DrawUtil.DrawGridHeaderRectangleAndText(g, brush, blackBrush, pen, null, headerFont, i, columnStartX, headerWidth, topHeaderHeight);
+                DrawTextUtil.DrawGridHeaderRectangleAndText(g, brush, blackBrush, pen, null, headerFont, i, columnStartX, headerWidth, topHeaderHeight);
 
                 columnStartX += headerWidth;
             }
@@ -367,7 +463,8 @@ namespace WANI_Grid
                 {
                     top += rows[j].MaxLines * rowHeight;
                 }
-                g.FillRectangle(selectedColor, leftHeaderWidth + 1, top + 1, width, rowHeight);
+
+                if (index >= firstVisibleRow) g.FillRectangle(selectedColor, leftHeaderWidth + 1, top + 1, width, rowHeight);
             }
         }
 
@@ -443,11 +540,11 @@ namespace WANI_Grid
         /// </summary>
         /// <param name="g"></param>
         /// <param name="rc"></param>
-        private void DrawHeaders(Graphics g, Rectangle rc, int colFixed)
+        private void DrawHeaders(Graphics g, Rectangle rc, int colFixed, bool fixedColEditable)
         {
             if (grid != null)
             {
-                grid.DrawHeader(g, rc, rc.Width, colFixed);
+                grid.DrawHeader(g, rc, rc.Width, colFixed, fixedColEditable);                
             }
         }
 
@@ -507,7 +604,6 @@ namespace WANI_Grid
                 else  //고정 컬럼이 있을 경우
                 {
                     int fixCol = GetLastFixedCol();
-
                     Col col = new Col(this.grid.HeaderGen.GetHeaders(), rows[i].DataRow);
                     for (int index = 0; index <= fixCol; index++)
                     {
@@ -529,6 +625,7 @@ namespace WANI_Grid
                         if (columnStartX + grid.GridHeaderList[index].Width > controlWidth)
                         {
                             columnWidth = controlWidth - columnStartX - 3;
+                            //고정컬럼 Backgroud 색상을 colFixBrush로 채운다
                             g.FillRectangle(colFixBrush, columnStartX + 1, columnStartY + 1, columnWidth, rowHeight);
                             g.DrawRectangle(pen, columnStartX + 1, columnStartY + 1, columnWidth, rowHeight);
                             Rectangle rec = new Rectangle(columnStartX + 2, columnStartY + 2, columnWidth - 2, rowHeight);
@@ -537,13 +634,15 @@ namespace WANI_Grid
                         else
                         {
                             columnWidth = grid.GridHeaderList[index].Width;
+                            //고정컬럼 Backgroud 색상을 colFixBrush로 채운다
                             g.FillRectangle(colFixBrush, columnStartX + 1, columnStartY + 1, columnWidth, rowHeight);
                             g.DrawRectangle(pen, columnStartX + 1, columnStartY + 1, columnWidth, rowHeight);
                             Rectangle rec = new Rectangle(columnStartX + 2, columnStartY + 2, columnWidth - 2, rowHeight);
                             DrawStringAlignment(content, rec, g, col.Alignment);
                         }
+                        YearMonthWeekNoDayHeader yearMonthHeader = grid.GridHeaderList[index] as YearMonthWeekNoDayHeader;
                         columnStartX += columnWidth;
-                    }
+                    }                    
 
                     int lastFixCol = fixCol + 1;
                     for (int j = firstVisibleCol + lastFixCol; j <= lastVisibleCol && j < grid.GridHeaderList.Count; j++)
@@ -579,7 +678,7 @@ namespace WANI_Grid
 
                     columnStartY += rowHeight;
                 }
-            }
+            }            
         }
 
         /// <summary>

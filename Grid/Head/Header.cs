@@ -26,6 +26,7 @@ namespace WANI_Grid.Grid.Head
         private HorizontalAlignment textAlign;  //컬럼 내용 정렬위치
         private bool visible = true;    //컬럼 Visible 여부
         private bool editable = true;   //컬럼 편집여부
+        private bool isDate = false;    //Calendar를 그리기 위한 날짜 정보인지 여부
         #endregion 변수
 
         #region Property
@@ -48,13 +49,16 @@ namespace WANI_Grid.Grid.Head
             get { return left; }
             set { left = value; }
         }
+        /// <summary>
+        /// 컬럼의 폭을 제어하는 속성. 최소 제한 폭은 5
+        /// </summary>
         public int Width
         {
             get { return width; }
             set
             {
-                if (value < 10)
-                    width = 10;
+                if (value < 5)
+                    width = 5;
                 else
                     width = value;
                 OnWidthResized();
@@ -79,6 +83,12 @@ namespace WANI_Grid.Grid.Head
         {
             get { return editable; }
             set { editable = value; }
+        }
+
+        public bool IsDate
+        {
+            get { return isDate; }
+            set { isDate = value; }
         }
         #endregion Property
 

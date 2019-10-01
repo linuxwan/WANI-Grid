@@ -18,6 +18,12 @@ namespace WANI_Grid.Grid.Head
 { 
     public class DefaultHeaderGenerator : HeaderGenerator
     {        
+        public DefaultHeaderGenerator()
+        {
+            TopHeaderHeight = 20;
+            this._headers.Clear();
+        }
+
         /// <summary>
         /// 컬럼 헤더 정보를 설정
         /// </summary>
@@ -45,7 +51,7 @@ namespace WANI_Grid.Grid.Head
         }
 
         /// <summary>
-        /// Header 그리기
+        /// 고정 컬럼이 없을 경우 Header 그리기
         /// </summary>
         /// <param name="firstVisibleCol"></param>
         /// <param name="lastVisibleCol"></param>
@@ -80,13 +86,22 @@ namespace WANI_Grid.Grid.Head
                 }
 
                 //Grid Header를 그린다.
-                DrawUtil.DrawGridHeaderRectangleAndText(graphics, brush, blackBrush, pen, this._headers, headerFont, i, columnStartX, headerWidth, topHeaderHeight);
+                DrawTextUtil.DrawGridHeaderRectangleAndText(graphics, brush, blackBrush, pen, this._headers, headerFont, i, columnStartX, headerWidth, topHeaderHeight);
                
                 columnStartX += headerWidth;                
             }
         }
 
-        public override void DrawHeaders(int colFixed, int firstVisibleCol, int lastVisibleCol, int controlWidth, Graphics graphics, Rectangle rect)
+        /// <summary>
+        /// 고정컬럼이 있을 경우 Header 그리기
+        /// </summary>
+        /// <param name="colFixed"></param>
+        /// <param name="firstVisibleCol"></param>
+        /// <param name="lastVisibleCol"></param>
+        /// <param name="controlWidth"></param>
+        /// <param name="graphics"></param>
+        /// <param name="rect"></param>
+        public override void DrawHeaders(int colFixed, int firstVisibleCol, int lastVisibleCol, int controlWidth, Graphics graphics, Rectangle rect, bool fixedColEditable)
         {
             SolidBrush brush = new SolidBrush(SystemColors.ControlLight);
             Pen pen = new Pen(Color.LightGray);
@@ -102,7 +117,10 @@ namespace WANI_Grid.Grid.Head
             {
                 if (!this._headers[i].Visible) continue;
                 int headerWidth = this._headers[i].Width;   //i 번째 컬럼의 폭을 설정  
-                
+
+                //고정컬럼 수정여부 확인
+                if (!fixedColEditable) this._headers[i].Editable = false;
+
                 //보여지는 컬럼의 폭이 컨트롤의 폭 보다 클경우
                 if (columnStartX + headerWidth > controlWidth)
                 {
@@ -115,7 +133,7 @@ namespace WANI_Grid.Grid.Head
                 }
 
                 //Grid Header를 그린다.
-                DrawUtil.DrawGridHeaderRectangleAndText(graphics, brush, blackBrush, pen, this._headers, headerFont, i, columnStartX, headerWidth, topHeaderHeight);
+                DrawTextUtil.DrawGridHeaderRectangleAndText(graphics, brush, blackBrush, pen, this._headers, headerFont, i, columnStartX, headerWidth, topHeaderHeight);
 
                 columnStartX += headerWidth;                
             }
@@ -139,7 +157,7 @@ namespace WANI_Grid.Grid.Head
                 if (i == lastVisibleCol && headerWidth == 0) break;
 
                 //Grid Header를 그린다.
-                DrawUtil.DrawGridHeaderRectangleAndText(graphics, brush, blackBrush, pen, this._headers, headerFont, i, columnStartX, headerWidth, topHeaderHeight);
+                DrawTextUtil.DrawGridHeaderRectangleAndText(graphics, brush, blackBrush, pen, this._headers, headerFont, i, columnStartX, headerWidth, topHeaderHeight);
 
                 columnStartX += headerWidth;
             }            
