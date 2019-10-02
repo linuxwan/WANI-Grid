@@ -746,6 +746,9 @@ namespace WANI_Grid
         {
             if (ActiveCell.Row != -1 && ActiveCell.Col != -1)
             {
+                //Calendar 날짜 컬럼은 Active Cell이 되지 않도록 처리
+                if (grid.GridHeaderList[ActiveCell.Col].IsDate) return;
+
                 //파선 패턴 설정
                 float[] dashValues = { 1, 1, 1, 1 };
                 Pen grayPen = new Pen(Color.Gray, 1);

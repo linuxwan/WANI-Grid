@@ -208,6 +208,9 @@ namespace WANI_Grid
                 int col = GetColFromX(e.X);
                 if (col < 0) return; //col값이 -1이면 처리하지 않음                
 
+                //Calendar 날짜 컬럼은 선택되지 않도록 처리
+                if (grid.GridHeaderList[col].IsDate) return;
+
                 //Control Key를 누르지 않은 상태에서 컬럼을 선택했을 경우
                 if (Control.ModifierKeys != Keys.Control && Control.ModifierKeys != Keys.Shift)
                 {
