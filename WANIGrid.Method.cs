@@ -540,6 +540,8 @@ namespace WANI_Grid
         /// </summary>
         /// <param name="g"></param>
         /// <param name="rc"></param>
+        /// <param name="colFixed"></param>
+        /// <param name="fixedColEditable"></param>
         private void DrawHeaders(Graphics g, Rectangle rc, int colFixed, bool fixedColEditable)
         {
             if (grid != null)
@@ -553,6 +555,7 @@ namespace WANI_Grid
         /// </summary>
         /// <param name="g"></param>
         /// <param name="rc"></param>
+        /// <param name="controlWidth"></param>
         private void DrawContent(Graphics g, Rectangle rc, int controlWidth)
         {
             SolidBrush brush = new SolidBrush(SystemColors.ControlLight);
