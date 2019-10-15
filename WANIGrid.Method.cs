@@ -749,6 +749,7 @@ namespace WANI_Grid
         {
             if (ActiveCell.Row != -1 && ActiveCell.Col != -1)
             {
+                if (ActiveCell.Col > grid.GridHeaderList.Count) return;
                 //Calendar 날짜 컬럼은 Active Cell이 되지 않도록 처리
                 if (grid.GridHeaderList[ActiveCell.Col].IsDate) return;
 
