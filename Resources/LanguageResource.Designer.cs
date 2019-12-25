@@ -95,5 +95,23 @@ namespace WANI_Grid.Resources {
                 return ResourceManager.GetString("Row.Delete", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Row Hide과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        internal static string Row_Hidden {
+            get {
+                return ResourceManager.GetString("Row.Hidden", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Cancel Row Hide과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        internal static string Row_HiddenCancel {
+            get {
+                return ResourceManager.GetString("Row.HiddenCancel", resourceCulture);
+            }
+        }
     }
 }

@@ -129,4 +129,10 @@
   <data name="Row.Delete" xml:space="preserve">
     <value>행 삭제</value>
   </data>
+  <data name="Row.Hidden" xml:space="preserve">
+    <value>행 숨기기</value>
+  </data>
+  <data name="Row.HiddenCancel" xml:space="preserve">
+    <value>행 숨기기 취소</value>
+  </data>
 </root>

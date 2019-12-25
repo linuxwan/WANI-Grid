@@ -129,4 +129,10 @@
   <data name="Row.Delete" xml:space="preserve">
     <value>Delete row</value>
   </data>
+  <data name="Row.Hidden" xml:space="preserve">
+    <value>Row Hide</value>
+  </data>
+  <data name="Row.HiddenCancel" xml:space="preserve">
+    <value>Cancel Row Hide</value>
+  </data>
 </root>

@@ -18,10 +18,12 @@ namespace WANI_Grid.Grid.Element
     public class Row : ICloneable
     {
         #region 변수
+        private string rowKey = String.Empty;
         private Color backColor;
         private Color foreColor;
         private bool selected;
         private int maxLines;
+        private bool hidden = false;
         private DataRow row;
         #endregion 변수
 
@@ -36,7 +38,7 @@ namespace WANI_Grid.Grid.Element
 
         public Row(DataRow dRow)
         {
-            maxLines = 1;
+            maxLines = 1;          
             selected = false;
             foreColor = Color.Black;
             backColor = Color.LightGray;
@@ -45,6 +47,12 @@ namespace WANI_Grid.Grid.Element
         #endregion 생성자
 
         #region Properties
+        public string RowKey
+        {
+            get { return rowKey; }
+            set { rowKey = value; }
+        }
+
         public int MaxLines
         {
             get { return maxLines; }
@@ -70,6 +78,15 @@ namespace WANI_Grid.Grid.Element
         {
             get { return selected; }
             set { selected = value; }
+        }
+
+        /// <summary>
+        /// 행을 숨기거나 할 경우
+        /// </summary>
+        public bool Hidden
+        {
+            get { return hidden; }
+            set { hidden = value; }
         }
 
         public DataRow DataRow

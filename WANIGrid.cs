@@ -254,11 +254,15 @@ namespace WANI_Grid
             rightClickMenu.MenuItems.Add(LanguageResource.Row_After_Insert);
             rightClickMenu.MenuItems.Add(LanguageResource.Row_Append);
             rightClickMenu.MenuItems.Add(LanguageResource.Row_Delete);
+            rightClickMenu.MenuItems.Add(LanguageResource.Row_Hidden);
+            rightClickMenu.MenuItems.Add(LanguageResource.Row_HiddenCancel);
 
             rightClickMenu.MenuItems[0].Click += new EventHandler(OnMenu_BeforeInsertRow_Click);
             rightClickMenu.MenuItems[1].Click += new EventHandler(OnMenu_AfterInsertRow_Click);
             rightClickMenu.MenuItems[2].Click += new EventHandler(OnMenu_AppenRow_Click);
             rightClickMenu.MenuItems[3].Click += new EventHandler(OnMenu_DeleteRow_Click);
+            rightClickMenu.MenuItems[4].Click += new EventHandler(OnMenu_RowHidden_Click);
+            rightClickMenu.MenuItems[5].Click += new EventHandler(OnMenu_RowHiddenCancel_Click);
         }
 
         /// <summary>

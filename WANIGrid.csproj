@@ -58,6 +58,8 @@
     <Compile Include="Grid\Head\DefaultHeader.cs" />
     <Compile Include="Grid\Head\DefaultHeaderGenerator.cs" />
     <Compile Include="Grid\Head\YearMonthWeekNoDayHeaderGenerator.cs" />
+    <Compile Include="Grid\Symbol\ISymbol.cs" />
+    <Compile Include="Grid\Symbol\Symbol.cs" />
     <Compile Include="Resources\LanguageResource.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -104,5 +106,6 @@
   <ItemGroup>
     <EmbeddedResource Include="WANIGrid.ico" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

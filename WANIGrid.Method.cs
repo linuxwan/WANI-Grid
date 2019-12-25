@@ -103,6 +103,7 @@ namespace WANI_Grid
             {
                 for (row = firstVisibleRow; row < lastVisibleRow; row++)
                 {
+                    if (rows[row].Hidden) continue;
                     int height = rows[row].MaxLines * rowHeight;
                     if (Y < height + tempHeight) break;
                     tempHeight += height;
@@ -243,6 +244,7 @@ namespace WANI_Grid
             {
                 for (rowIndex = firstVisibleRow, tempRow = 0; rowIndex < rows.Count && tempRow < Height - xsclHeight - topHeaderHeight; rowIndex++)
                 {
+                    if (rows[rowIndex].Hidden) continue;
                     tempRow += rows[rowIndex].MaxLines * rowHeight;
                 }
                 lastVisibleRow = rowIndex;
@@ -411,7 +413,7 @@ namespace WANI_Grid
             vScrollBar.Visible = true;
 
             for (int i = 0; i < rows; i++)
-            {
+            {                
                 columnStartX = 0;
                 g.FillRectangle(brush, columnStartX + 1, i * rowHeight, leftHeaderWidth, topHeaderHeight);
                 g.DrawRectangle(pen, columnStartX + 1, i * rowHeight, leftHeaderWidth, topHeaderHeight);
@@ -438,7 +440,7 @@ namespace WANI_Grid
         private void SelectedRowChangeBackground(Graphics g, int lastFixedCol)
         {
             for (int i = 0; i < selectedRows.Count; i++)
-            {
+            {                
                 int index = selectedRows[i];
                 int top = topHeaderHeight;
                 int width = 0;
@@ -461,6 +463,7 @@ namespace WANI_Grid
 
                 for (int j = firstVisibleRow; j < lastVisibleRow && j < index; j++)
                 {
+                    if (rows[j].Hidden) continue;
                     top += rows[j].MaxLines * rowHeight;
                 }
 
@@ -567,6 +570,7 @@ namespace WANI_Grid
             int columnStartY = topHeaderHeight;
             for (int i = firstVisibleRow; i <= lastVisibleRow && i < rows.Count; i++)
             {
+                if (rows[i].Hidden) continue;
                 int columnStartX = 0;
                 int columnWidth = 0;
 
@@ -757,6 +761,7 @@ namespace WANI_Grid
                 float[] dashValues = { 1, 1, 1, 1 };
                 Pen grayPen = new Pen(Color.Gray, 1);
                 grayPen.DashPattern = dashValues;
+                g.FillRectangle(new SolidBrush(SystemColors.ControlLightLight), GetSelectedCellRect(ActiveCell.Row, ActiveCell.Col));
                 g.DrawRectangle(grayPen, GetSelectedCellRect(ActiveCell.Row, ActiveCell.Col));
             }
         }
@@ -797,6 +802,7 @@ namespace WANI_Grid
                     EndEdit();
                     continue;
                 }
+                if (rows[i].Hidden) continue;
                 height = rows[i].MaxLines * rowHeight;
                 if (row == i) break;
                 top += height;
@@ -868,7 +874,7 @@ namespace WANI_Grid
                     }
                 }
             }
-            return new Rectangle(left - 1, top + 1, width - 1, height - 1);
+            return new Rectangle(left, top, width, height);
         }
 
         /// <summary>
@@ -937,11 +943,36 @@ namespace WANI_Grid
             if (delRow < rows.Count && delRow >= 0)
             {
                 DataRow row = rows[delRow].DataRow; //전체 Row중에 선택 Row를 가져온다.
-                row.Delete();   //해당 Row 정보를 delete한다. 
+                row.Delete();   //해당 Row 정보를 delete한다.                 
                 rows.RemoveAt(delRow);  //전체 Row중에 선택된 Row를 제거한다.      
                 allRowsHeight -= rowHeight; //전제 Row의 높이에서 선택된 Row의 높이를 뺀다
                 OnRowsChanged();
             }
+        }
+
+        /// <summary>
+        /// Row를 숨기거나 숨기기 취소
+        /// </summary>
+        /// <param name="hideRow"></param>
+        /// <param name="isHide"></param>
+        public void HideAndHideCancelRow(int hideRow, bool isHide)
+        {            
+            if (hideRow < rows.Count && hideRow >= 0)
+            {
+                if (!isHide)
+                {
+                    List<Row> rowList = rows.Cast<Row>().Where(x => x.Hidden).ToList();
+                    foreach (Row row in rowList)
+                    {
+                        row.Hidden = isHide;
+                    }
+                } 
+                else
+                {
+                    rows[hideRow].Hidden = isHide;
+                }
+            }
+            OnRowsChanged();
         }
 
         /// <summary>

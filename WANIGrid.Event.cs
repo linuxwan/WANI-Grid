@@ -51,6 +51,37 @@ namespace WANI_Grid
         }
 
         /// <summary>
+        /// 선택한 행(Row) 숨기기
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        protected void OnMenu_RowHidden_Click(object sender, EventArgs e)
+        {
+            if (selectedRows.Count > 0)
+            {
+                foreach (int rowNo in selectedRows)
+                {
+                    HideAndHideCancelRow(rowNo, true);                    
+                }
+                selectedRows.Clear();
+            }
+        }
+
+        /// <summary>
+        /// 선택한 행(Row) 모두 숨기기 취소
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        protected void OnMenu_RowHiddenCancel_Click(object sender, EventArgs e)
+        {            
+            if (selectedRows.Count > 0)
+            {
+                HideAndHideCancelRow(selectedRows[0], false);                
+                selectedRows.Clear();
+            }
+        }
+
+        /// <summary>
         /// 선택 Row 앞에 행(Row)을 추가
         /// </summary>
         /// <param name="sender"></param>
@@ -114,10 +145,10 @@ namespace WANI_Grid
         {
             CalcVisibleRange();
             ReCalcScrollBars();
-            DrawBackground(e.Graphics, rc);
+            DrawBackground(e.Graphics, rc);            
             DrawHeaders(e.Graphics, rc, colFixed, fixedColEditable);
-            DrawContent(e.Graphics, rc, this.ClientRectangle.Width);
             DrawActiveCell(e.Graphics);
+            DrawContent(e.Graphics, rc, this.ClientRectangle.Width);            
         }
 
         /// <summary>
@@ -278,6 +309,7 @@ namespace WANI_Grid
                     int k = 0;
                     for (int i = r.Top; i < r.Bottom && k < rows[row].MaxLines - 1; i *= rowHeight, k++)
                     {
+                        if (rows[row].Hidden) continue;
                         if (e.Y >= i && e.Y <= i + rowHeight) break;
                     }
                     if (ActiveCell_ActiveRow != k) EndEdit();
@@ -287,7 +319,7 @@ namespace WANI_Grid
                 else
                 {
                     ActiveCell.Row = row;
-                    ActiveCell.Col = col;
+                    ActiveCell.Col = col;                    
                     EndEdit();
                     SelectedRowsChangeColor(ActiveCell.Row);
                 }
