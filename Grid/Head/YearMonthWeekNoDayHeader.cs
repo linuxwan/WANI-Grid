@@ -77,7 +77,7 @@ namespace WANI_Grid.Grid.Head
         {
             this.ColumnId = "";
             this.Title = "";
-            this.Width = 10;
+            this.Width = 12;
             this.HeadAlign = HorizontalAlignment.Center;
             this.TextAlign = HorizontalAlignment.Left;
             this.Visible = true;            
@@ -92,7 +92,7 @@ namespace WANI_Grid.Grid.Head
             if (day < 10) strDay = "0" + day;
             else strDay = day.ToString();
             this.Title = strDay;
-            this.Width = 10;
+            this.Width = 12;
             this.HeadAlign = HorizontalAlignment.Center;
             this.TextAlign = HorizontalAlignment.Center;
             this.Visible = true;
@@ -140,7 +140,7 @@ namespace WANI_Grid.Grid.Head
         {
             this.ColumnId = fieldName;
             this.Title = title;
-            this.Width = 100;
+            this.Width = 12;
             this.HeadAlign = HorizontalAlignment.Center;
             this.TextAlign = txtAlign;
             this.Visible = visible;

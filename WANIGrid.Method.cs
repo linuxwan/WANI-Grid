@@ -173,9 +173,10 @@ namespace WANI_Grid
             if ((allColsWidth > 0) && (allColsWidth > ClientSize.Width - ysclWidth))
             {
                 hScrollBar.Visible = true;
-                hScrollBar.LargeChange = ((lastVisibleCol - firstVisibleCol) + 1) / 2 + 1;
-                lastHScrollValue = ((lastVisibleCol - firstVisibleCol) + 1) / 2 + 1;
-                hScrollBar.Maximum = grid.GridHeaderList.Count;
+                hScrollBar.LargeChange = 3;
+                hScrollBar.SmallChange = 1;
+                lastHScrollValue = ((lastVisibleCol - firstVisibleCol) + 1) / 2 + 2;
+                hScrollBar.Maximum = grid.GridHeaderList.Count - 1;
 
                 //가로 스크롤바가 나타났을 때 세로 스크롤바 설정
                 vScrollBar.Left = Width - vScrollBar.Width - 2;
@@ -285,6 +286,8 @@ namespace WANI_Grid
                         }
                     }
 
+                    if (IsLastColDisplay()) return;
+
                     if (i <= grid.GridHeaderList.Count)
                     {
                         lastVisibleCol = i + 1;
@@ -312,6 +315,24 @@ namespace WANI_Grid
                     grid.LastVisibleCol = 0;
                 }
             }
+        }
+
+        private bool IsLastColDisplay()
+        {
+            bool check = false;
+            int fixedWidth = GetFixedColWidth();
+            int lastGridWidth = 0;
+            if (lastVisibleCol == (grid.GridHeaderList.Count - 1))
+            {
+                for (int i = firstVisibleCol; i <= lastVisibleCol; i++)
+                {
+                    lastGridWidth += grid.GridHeaderList[i].Width;
+                }
+
+                if ((Width - ysclWidth - leftHeaderWidth) > (fixedWidth + lastGridWidth)) check = true;
+            }            
+
+            return check;
         }
 
         /// <summary>

@@ -60,6 +60,7 @@
     <Compile Include="Grid\Head\YearMonthWeekNoDayHeaderGenerator.cs" />
     <Compile Include="Grid\Symbol\ISymbol.cs" />
     <Compile Include="Grid\Symbol\Symbol.cs" />
+    <Compile Include="Grid\Symbol\Type\SymbolType.cs" />
     <Compile Include="Resources\LanguageResource.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

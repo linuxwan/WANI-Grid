@@ -453,9 +453,10 @@ namespace WANI_Grid
         public void HScrollBar_Scroll(object sender, ScrollEventArgs e)
         {
             EndEdit();
+            if (e.NewValue > hScrollBar.Maximum) e.NewValue = hScrollBar.Maximum;            
             
             //가로 스크롤바를 움직여서 마지막 컬럼이 Client 영역에 나타났을 때
-            if (e.NewValue >= (grid.GridHeaderList.Count - lastHScrollValue))
+            if (e.NewValue >= (grid.GridHeaderList.Count - firstVisibleCol))
             {
                 //마지막 컬럼의 전체가 Client 영역에 모두 나타나지 않았을 때
                 if (grid.HeaderGen.IsLargeLastCol)
@@ -469,31 +470,35 @@ namespace WANI_Grid
                             grid.FirstVisibleCol = firstVisibleCol;
                             e.NewValue = firstVisibleCol;
                             chkLast = true;
-                        } else if (chkLast)
+                        }
+                        else if (chkLast)
                         {
                             firstVisibleCol = currentCol;
                             grid.FirstVisibleCol = firstVisibleCol;
                             chkLast = true;
                         }
+                        hScrollBar.Value = hScrollBar.Maximum;
                     }
                 }
                 else
                 {
-                    if (e.NewValue <= grid.GridHeaderList.Count - lastHScrollValue && grid.LastVisibleCol != (grid.GridHeaderList.Count - 1))
+                    if (e.NewValue <= (grid.GridHeaderList.Count - lastHScrollValue) && grid.LastVisibleCol != (grid.GridHeaderList.Count - 1))
                     {
                         firstVisibleCol = e.NewValue;
                         grid.FirstVisibleCol = firstVisibleCol;
-                        if (e.NewValue + firstVisibleCol >= grid.GridHeaderList.Count - 1) grid.LastVisibleCol = grid.GridHeaderList.Count - 1;                        
-                        lastHScrollValue = ((lastVisibleCol - firstVisibleCol) + 1) / 2 + 1;
+                        if (e.NewValue + firstVisibleCol >= grid.GridHeaderList.Count - 1) grid.LastVisibleCol = grid.GridHeaderList.Count - 1;
+                        lastHScrollValue = ((lastVisibleCol - firstVisibleCol) + 1) / 2 + 2;
                         chkLast = false;
-                    } else if (e.NewValue + colFixed >= grid.GridHeaderList.Count - 1)
+                    }
+                    else if (e.NewValue + colFixed >= grid.GridHeaderList.Count - 1)
                     {
                         if (chkLast) firstVisibleCol = currentCol + 1;
                         grid.FirstVisibleCol = firstVisibleCol;
                         lastVisibleCol = grid.GridHeaderList.Count - 1;
                         grid.LastVisibleCol = lastVisibleCol;
-                    }
+                    }                    
                 }
+                hScrollBar.Value = hScrollBar.Maximum;
             }
             else
             {
@@ -504,17 +509,91 @@ namespace WANI_Grid
                         firstVisibleCol = e.NewValue;
                         grid.FirstVisibleCol = firstVisibleCol;
                         if (e.NewValue + firstVisibleCol >= grid.GridHeaderList.Count - 1) grid.LastVisibleCol = grid.GridHeaderList.Count - 1;
-                        lastHScrollValue = ((lastVisibleCol - firstVisibleCol) + 1) / 2 + 1;
+                        lastHScrollValue = ((lastVisibleCol - firstVisibleCol) + 1) / 2 + 2;
                         chkLast = false;
                     }
-                    else if (e.NewValue < firstVisibleCol || e.NewValue < (lastVisibleCol - e.NewValue) || e.NewValue < lastVisibleCol)
+                    else if (e.NewValue < firstVisibleCol || e.NewValue >= lastHScrollValue || e.NewValue < lastVisibleCol)
                     {
-                        firstVisibleCol = e.NewValue;
-                        grid.FirstVisibleCol = firstVisibleCol;
-                        chkLast = true;
-                    }                           
+                        if (lastVisibleCol == grid.GridHeaderList.Count - 1)
+                        {
+                            if (firstVisibleCol > 0 && e.NewValue < firstVisibleCol)
+                            {
+                                firstVisibleCol = e.NewValue;
+                                grid.FirstVisibleCol = firstVisibleCol;
+                            } else
+                            {
+                                firstVisibleCol = e.NewValue;
+                                grid.FirstVisibleCol = firstVisibleCol;
+                            }
+                        } else
+                        {
+                            firstVisibleCol = e.NewValue;
+                            grid.FirstVisibleCol = firstVisibleCol;
+                        }
+
+                        if (lastVisibleCol == (grid.GridHeaderList.Count - 1))
+                        {
+                            int fixedWidth = GetFixedColWidth();
+                            int lastGridWidth = 0;
+                            if (lastVisibleCol == (grid.GridHeaderList.Count - 1))
+                            {
+                                for (int i = firstVisibleCol; i <= lastVisibleCol; i++)
+                                {
+                                    lastGridWidth += grid.GridHeaderList[i].Width;
+                                }
+                            }
+                            if ((Width - ysclWidth - leftHeaderWidth) < (fixedWidth + lastGridWidth))
+                            {
+                                if (firstVisibleCol == 0)
+                                {
+                                    grid.FirstVisibleCol = firstVisibleCol;
+                                    hScrollBar.Value = firstVisibleCol;
+                                }
+                                else
+                                {
+                                    grid.FirstVisibleCol = firstVisibleCol;
+                                    hScrollBar.Value = hScrollBar.Maximum;
+                                }
+                            }
+                            else
+                            {
+                                firstVisibleCol = lastHScrollValue;
+                                grid.FirstVisibleCol = firstVisibleCol;
+                                hScrollBar.Value = hScrollBar.Maximum;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        int fixedWidth = GetFixedColWidth();
+                        int lastGridWidth = 0;
+                        if (lastVisibleCol == (grid.GridHeaderList.Count - 1))
+                        {
+                            for (int i = firstVisibleCol; i <= lastVisibleCol; i++)
+                            {
+                                lastGridWidth += grid.GridHeaderList[i].Width;
+                            }
+                        }
+                        if ((Width - ysclWidth - leftHeaderWidth) < (fixedWidth + lastGridWidth))
+                        {
+                            firstVisibleCol += 1;
+                            grid.FirstVisibleCol = firstVisibleCol;
+                            hScrollBar.Value = hScrollBar.Maximum;
+                        }
+                        else
+                        {
+                            grid.FirstVisibleCol = firstVisibleCol;
+                            hScrollBar.Value = hScrollBar.Maximum;
+                        }
+                    }
+                }
+                else
+                {
+                    firstVisibleCol = e.NewValue;
+                    grid.FirstVisibleCol = firstVisibleCol;                    
                 }
             }
+            
             CalcVisibleRange();
             ReCalcScrollBars();
             Invalidate();

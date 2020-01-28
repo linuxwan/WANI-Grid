@@ -36,6 +36,7 @@
             // hScrollBar
             // 
             resources.ApplyResources(this.hScrollBar, "hScrollBar");
+            this.hScrollBar.LargeChange = 3;
             this.hScrollBar.Name = "hScrollBar";
             // 
             // vScrollBar

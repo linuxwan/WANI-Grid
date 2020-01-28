@@ -21,7 +21,9 @@ namespace WANI_Grid.Grid.Symbol
         private string rowKey;  //Symbol이 위치하는 RowKey값
         private DateTime startDate; //Symbol 시작일자
         private DateTime finishDate;    //Symbol 종료일자
-        private int duration;   //시작일자와 종료일자 사이의 일수
+        private int col = 0;    //Column 위치
+        private int row = 0;    //Row 위치
+        private int duration = 1;   //시작일자와 종료일자 사이의 일수
         #endregion 변수선언
 
         #region Property
@@ -56,6 +58,14 @@ namespace WANI_Grid.Grid.Symbol
         {
             get { return finishDate; }
             set { finishDate = value; }
+        }
+        /// <summary>
+        /// 시작일자와 종료일자 사이의 기간(종료일자 - 시작일자 + 1)
+        /// </summary>
+        public int Duration
+        {
+            get { return duration; }
+            set { duration = value; }
         }
         #endregion Property
 
