@@ -283,7 +283,7 @@ namespace WANI_Grid
                         for (i = firstVisibleCol + colFixed, tempPos = fixedWidth; i < grid.GridHeaderList.Count && tempPos < Width; i++)
                         {
                             if (grid.GridHeaderList[i].Visible) tempPos += grid.GridHeaderList[i].Width;
-                        }
+                        }                        
                     }
 
                     if (IsLastColDisplay()) return;
@@ -317,6 +317,10 @@ namespace WANI_Grid
             }
         }
 
+        /// <summary>
+        /// 마지막 컬럼의 폭을 모두 Display하면서 Client Width 범위 내에 들어갈 경우 true를 리턴
+        /// </summary>
+        /// <returns></returns>
         private bool IsLastColDisplay()
         {
             bool check = false;
@@ -326,6 +330,7 @@ namespace WANI_Grid
             {
                 for (int i = firstVisibleCol; i <= lastVisibleCol; i++)
                 {
+                    if (i <= colFixed) continue;
                     lastGridWidth += grid.GridHeaderList[i].Width;
                 }
 
@@ -359,7 +364,7 @@ namespace WANI_Grid
                 YearMonthWeekNoDayHeader yearMonthHeader = grid.GridHeaderList[i] as YearMonthWeekNoDayHeader;
                 if (yearMonthHeader != null && yearMonthHeader.GetDateTime <= DateTime.MinValue) enableFixCol = i;
             }
-            if (lastFixedCol > enableFixCol) lastFixedCol = enableFixCol;
+            if (enableFixCol > 0 && lastFixedCol > enableFixCol) lastFixedCol = enableFixCol;
 
             //선택된 컬럼의 Background를 그린다.
             SelectedColChangeBackground(g, lastFixedCol);

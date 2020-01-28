@@ -453,10 +453,11 @@ namespace WANI_Grid
         public void HScrollBar_Scroll(object sender, ScrollEventArgs e)
         {
             EndEdit();
-            if (e.NewValue > hScrollBar.Maximum) e.NewValue = hScrollBar.Maximum;            
-            
+            if (e.NewValue > hScrollBar.Maximum) e.NewValue = hScrollBar.Maximum;
+            if (e.NewValue >= firstVisibleCol && IsLastColDisplay()) return;
+
             //가로 스크롤바를 움직여서 마지막 컬럼이 Client 영역에 나타났을 때
-            if (e.NewValue >= (grid.GridHeaderList.Count - firstVisibleCol))
+            if (e.NewValue >= (grid.GridHeaderList.Count - firstVisibleCol - colFixed))
             {
                 //마지막 컬럼의 전체가 Client 영역에 모두 나타나지 않았을 때
                 if (grid.HeaderGen.IsLargeLastCol)
@@ -481,7 +482,7 @@ namespace WANI_Grid
                     }
                 }
                 else
-                {
+                {                    
                     if (e.NewValue <= (grid.GridHeaderList.Count - lastHScrollValue) && grid.LastVisibleCol != (grid.GridHeaderList.Count - 1))
                     {
                         firstVisibleCol = e.NewValue;
@@ -493,12 +494,22 @@ namespace WANI_Grid
                     else if (e.NewValue + colFixed >= grid.GridHeaderList.Count - 1)
                     {
                         if (chkLast) firstVisibleCol = currentCol + 1;
+                        if (firstVisibleCol > currentCol) firstVisibleCol = currentCol;
                         grid.FirstVisibleCol = firstVisibleCol;
                         lastVisibleCol = grid.GridHeaderList.Count - 1;
                         grid.LastVisibleCol = lastVisibleCol;
-                    }                    
-                }
-                hScrollBar.Value = hScrollBar.Maximum;
+                    }
+
+                    if (lastVisibleCol != grid.GridHeaderList.Count - 1)
+                    {
+                        if (e.NewValue > currentCol)
+                        {
+                            firstVisibleCol = currentCol + 1;
+                            grid.FirstVisibleCol = firstVisibleCol;
+                            hScrollBar.Value = firstVisibleCol;
+                        }
+                    }
+                }                
             }
             else
             {
@@ -516,15 +527,11 @@ namespace WANI_Grid
                     {
                         if (lastVisibleCol == grid.GridHeaderList.Count - 1)
                         {
-                            if (firstVisibleCol > 0 && e.NewValue < firstVisibleCol)
+                            if ((firstVisibleCol > 0 && e.NewValue < firstVisibleCol) || firstVisibleCol == 0)
                             {
                                 firstVisibleCol = e.NewValue;
                                 grid.FirstVisibleCol = firstVisibleCol;
-                            } else
-                            {
-                                firstVisibleCol = e.NewValue;
-                                grid.FirstVisibleCol = firstVisibleCol;
-                            }
+                            } 
                         } else
                         {
                             firstVisibleCol = e.NewValue;
@@ -589,8 +596,26 @@ namespace WANI_Grid
                 }
                 else
                 {
-                    firstVisibleCol = e.NewValue;
-                    grid.FirstVisibleCol = firstVisibleCol;                    
+                    if (lastVisibleCol < grid.GridHeaderList.Count - 1)
+                    {
+                        firstVisibleCol = e.NewValue;
+                        grid.FirstVisibleCol = firstVisibleCol;
+                    }
+
+                    if (lastVisibleCol == grid.GridHeaderList.Count - 1)
+                    {
+                        firstVisibleCol = currentCol + 1;
+                        grid.FirstVisibleCol = firstVisibleCol;
+                    }
+                    else
+                    {
+                        if (e.NewValue > currentCol)
+                        {
+                            firstVisibleCol = currentCol + 1;
+                            grid.FirstVisibleCol = firstVisibleCol;
+                            hScrollBar.Value = firstVisibleCol;
+                        }
+                    }
                 }
             }
             
