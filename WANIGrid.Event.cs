@@ -457,6 +457,7 @@ namespace WANI_Grid
             if (lastVisibleCol == grid.GridHeaderList.Count - 1)
             {
                 if (e.NewValue == 0 && firstVisibleCol == 0) return;
+                
                 if (!IsLastColDisplay())
                 {
                     if (e.NewValue > 0)
@@ -472,23 +473,47 @@ namespace WANI_Grid
                         }
                     } else
                     {
-                        firstVisibleCol = e.NewValue;
-                        grid.FirstVisibleCol = firstVisibleCol;
+                        if (e.OldValue > e.NewValue)
+                        {
+                            firstVisibleCol = currentCol;
+                            grid.FirstVisibleCol = firstVisibleCol;
+                        }
+                        else
+                        {
+                            firstVisibleCol = e.NewValue;
+                            grid.FirstVisibleCol = firstVisibleCol;
+                        }
                     }
                 } else
                 {                   
                     if (firstVisibleCol > e.NewValue)
                     {
-                        firstVisibleCol = e.NewValue;
-                        grid.FirstVisibleCol = firstVisibleCol;
-                        hScrollBar.Value = firstVisibleCol;
+                        if (e.OldValue > e.NewValue)
+                        {
+                            firstVisibleCol = currentCol;
+                            grid.FirstVisibleCol = firstVisibleCol;
+                        }
+                        else
+                        {
+                            firstVisibleCol = e.NewValue;
+                            grid.FirstVisibleCol = firstVisibleCol;
+                            hScrollBar.Value = firstVisibleCol;
+                        }
                     } 
                 }
             } else
             {
-                firstVisibleCol = e.NewValue;
-                grid.FirstVisibleCol = firstVisibleCol;
-                hScrollBar.Value = e.NewValue;
+                if (e.OldValue > e.NewValue)
+                {
+                    firstVisibleCol = currentCol;
+                    grid.FirstVisibleCol = firstVisibleCol;
+                }
+                else
+                {
+                    firstVisibleCol = e.NewValue;
+                    grid.FirstVisibleCol = firstVisibleCol;
+                    hScrollBar.Value = e.NewValue;
+                }
             }
 
             CalcVisibleRange();
